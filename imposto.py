@@ -1,70 +1,57 @@
-#!/usr/bin/python
+#!/usr/local/homebrew/bin/python3
 
 import bisect
 import csv
 import calendar
 import codecs
 import datetime
+import dateutil.parser
 import io
-from urllib2 import urlopen
-from urllib import quote_plus, urlencode
-# from urllib.parse import quote_plus, urlencode
-# from urllib.request import urlopen
-from optparse import OptionParser
+from urllib.parse import quote_plus, urlencode
+from urllib.request import urlopen
+from argparse import ArgumentParser, FileType
 import os
 import re
 import sys
 import time
 
+import exchangerate
+
 # http://pypi.python.org/packages/3.2/l/lxml/lxml-2.3.win32-py3.2.exe
 from lxml.html import parse, submit_form, fromstring, tostring
 
+class Transaction:
+  def __init__(self, transaction_row):
+    self.date = datetime.datetime.strptime(transaction_row[0], '%d-%b-%Y').isoformat()
+    self.ttype = transaction_row[1]
+    self.price = transaction_row[2]  # always zero
+    self.usdbrl = .0
+    self.shares = float(transaction_row[3])
+    self.proceeds = transaction_row[4]
+    self.balance = transaction_row[5]
+
 def calculate_taxes(benefit_access_csv, cpf, output_dir):
 
-    now_label = datetime.datetime.now().strftime('%Y-%m-%d')
+    now_label = datetime.datetime.now().isoformat()
     logfile = open(os.path.join(output_dir, 'carne-leao-%s.txt' % now_label), 'w')
-    print(benefit_access_csv)
-    usd_exchange_table = get_usd_exchange()
-    reader = csv.reader(open(benefit_access_csv))
+    xchgdb = exchangerate.ExchangeRateDB('xchgrate')
+    reader = csv.reader(benefit_access_csv)
 
     income_by_month = {}
     for row in reader:
-        if len(row) < 2:
+        if len(row) < 5 or row[0] == 'Transaction Date' or not row[0]:
             continue
-        if row[1] != 'Release':
-            continue
-        release_date = datetime.datetime.strptime(row[0], '%d-%b-%Y')
-        share_count = float(row[3])
-        if release_date.strftime('%Y%m%d') < usd_exchange_table[0][0]:  # no usd exchange data before that
-            print("Skipping %d shares released at %s" % (share_count, row[0]))
-            continue
-
-        # Get share value from Google Finance
-        formatted_release_date = quote_plus(release_date.strftime('%d %b, %Y'))
-        share_value_url = 'http://www.google.com/finance/historical?cid=694653&enddate=%s&num=1' % formatted_release_date
-        share_value_html = str(urlopen(share_value_url).read())
-        # Use Close value as done in the Benefit Access letter
-        m = re.search('(\d+\.\d\d)\n<td class="rgt rm">', share_value_html)
-        share_value = float(m.group(1))  # last match, closing time
-        assert(share_value > 100 and share_value < 1000)
-
+        txn = Transaction(row)
+        txn.price = xchgdb.getGOOG(txn.date)
+        txn.usdbrl = xchgdb.getUSDBRL(txn.date)
 
         # From http://www.receita.fazenda.gov.br/PessoaFisica/IRPF/2010/Perguntas/CarneLeao.htm#
         # and from http://www.edsouza.net/declarar-imposto-de-renda-de-moeda-estrangeira-dolar-euro-etc
-        usd_exchange_date = release_date
-        while usd_exchange_date.day > 15 or usd_exchange_date.month == release_date.month:
-            usd_exchange_date -= datetime.timedelta(days=1)
-        key = (usd_exchange_date.strftime('%Y%m%d'), 0)
-        usd_exchange = bisect.bisect_left(usd_exchange_table, key)
-        if usd_exchange == 0:
-            print("Skipping %d shares released at %s. No USD information." % (share_count, row[0]))
-            continue
-        (usd_date, usd_value) = usd_exchange_table[usd_exchange]
-        brl_release_value = usd_value * share_value * share_count
-        format_tuple = (release_date.strftime('%Y-%m-%d'), share_count, brl_release_value,
-                        share_value, release_date.strftime('%Y%m%d'), usd_value, usd_date)
+        brl_release_value = txn.price * txn.usdbrl * txn.shares
+        format_tuple = (txn.date, txn.shares, brl_release_value,
+                        txn.price, txn.date, txn.usdbrl, txn.date)
         logfile.write('%s: vested %d shares for total value R$%.2f (1 GSU = %.2f @ %s, 1 USD = %.2f @ %s)\n' % format_tuple)
-        key = release_date.strftime('%Y%m')
+        key = dateutil.parser.parse(txn.date).strftime('%Y%m')
         income_by_month.setdefault(key, 0)
         income_by_month[key] += brl_release_value
 
@@ -195,12 +182,11 @@ def get_usd_exchange():
     #usd_ratio
 
 if __name__ == '__main__':
-    parser = OptionParser()
-    parser.add_option("-c", "--cpf", help="Cadastro de Pessoa Fisica")
-    parser.add_option("-b", "--benefit_access_csv", help="File from benefitaccess.com")
-    parser.add_option("-o", "--output_dir", default="./imposto", help="Output directory")
-    (options, args) = parser.parse_args()
-    if not os.path.isdir(options.output_dir):
-      os.makedirs(options.output_dir)
-    cpf = options.cpf.replace('-', '')
-    calculate_taxes(options.benefit_access_csv, cpf, options.output_dir)
+    parser = ArgumentParser()
+    parser.add_argument("cpf", help="Cadastro de Pessoa Fisica")
+    parser.add_argument("benefit_access_csv", help="File from benefitaccess.com", type=FileType('r'))
+    parser.add_argument("-o", "--output_dir", default="./darfs", help="Output directory")
+    args = parser.parse_args()
+    if not os.path.isdir(args.output_dir):
+      os.makedirs(args.output_dir)
+    calculate_taxes(args.benefit_access_csv, args.cpf, args.output_dir)
