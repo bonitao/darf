@@ -1,20 +1,39 @@
 #!/usr/local/homebrew/bin/python3
 
+# Crazy pickle wants this here
+class TaxTableEntry:
+  def __init__(self, date, base, tax, deduction):
+    self.date = date
+    self.base = base
+    self.tax = tax
+    self.deduction = deduction
+
 import bisect
 import datetime
+import dateutil.parser
 import re
+import shelve
+import sys
 from lxml.html import parse, submit_form, fromstring, tostring
 
 class LionTax:
-  def __init__(self):
+  def __init__(self, dbpath):
     self.tax_table_url = 'http://www.receita.fazenda.gov.br/aliquotas/ContribFont2012a2015.htm'
-    self._crawlTaxTable(self.tax_table_url)
-    self.tax_table = [
-     ]
+
+    try:
+      self.tax_table = shelve.open(dbpath + '.lion', 'r')
+    except:
+      self.tax_table = shelve.open(dbpath + '.lion', writeback = True)
+    for entry in self._crawlTaxTable(self.tax_table_url):
+      key = '%s:%s' % (entry.date, format(entry.base, '010.2f'))
+      self.tax_table.setdefault(key, entry)
 
   def _crawlTaxTable(self, url):
-    tree = parse('ContribFont2012a2015.html')
-    # open('ContribFont2012a2015.html', 'w').write(tostring(tree, pretty_print=True, method='html').decode('utf-8'))
+    tree = None
+    try:
+       tree = parse('ContribFont2012a2015.html')
+    except:
+       tree = parse(self.tax_table_url)
     headers = tree.xpath("//tr/td[@valign='MIDDLE']")
     values = tree.xpath("//tr/td[@valign='TOP']")
     base = -1
@@ -22,7 +41,7 @@ class LionTax:
     deduction = -1
     for i, v in enumerate(values):
       txt = tostring(v).decode('utf-8')
-      key = self._findDate(tree, v)
+      date = self._findDate(tree, v)
       celltype = i % 3
       if celltype == 0:
         m = re.search(' (\d\.\d\d\d),(\d\d)</span>', txt)
@@ -40,20 +59,7 @@ class LionTax:
         deduction = 0
         if m.group(1) != '-':
           deduction = float(m.group(2)) + float(m.group(3))/100
-        print('Date: %s base %f tax %f deduction %f' % (key, base, tax, deduction))
-
-#cell: <td valign="TOP"><span lang="PT-BR">
-#                At&#233; 1.499,15</span></td>&#13;
-#                
-#cell: <td valign="TOP"><span lang="PT-BR">
-#                
-#                <p align="CENTER">-</p></span></td>&#13;
-#                
-#cell: <td valign="TOP"><span lang="PT-BR">
-#                
-#                <p align="CENTER">-</p></span></td>&#13;
-#        
-#
+        yield TaxTableEntry(date, base, tax, deduction)
 
   def _findDate(self, tree, node):
     month_regexp = re.compile('nos meses de (\w+) a \w+')
@@ -100,7 +106,25 @@ class LionTax:
       return datetime.date(year=year, month=month, day=1).isoformat()
     return None
 
+  def calculateTax(self, value, date):
+    pivot = '%s:%s' % (datetime.date(year=1990, month=1, day=1), format(0, '010.2f'))
+    tbl = [ pivot ] + sorted(self.tax_table.keys())
+    key = datetime.date(year=date.year, month=date.month, day=1).isoformat()
+    key = '%s:%s' % (key, format(value, '010.2f'))
+    entry_key = tbl[bisect.bisect_left(tbl, key) - 1]
+    if entry_key == pivot:
+       err = 'No tax data available for date %s' % date.isoformat()
+       print(err)
+       sys.exit(-1)
+    entry = self.tax_table[entry_key]
+    tax = value * (entry.tax/100) - entry.deduction
+    return tax
+
 
 
 if __name__ == '__main__':
-  tax = LionTax()
+  value = float(sys.argv[1])
+  date = dateutil.parser.parse(sys.argv[2])
+  calculator = LionTax('xchgrate')
+  tax = calculator.calculateTax(value, date)
+  print('R$%f @%s gives tax of %f\n' %(value, sys.argv[2], tax))
