@@ -29,11 +29,7 @@ class LionTax:
       self.tax_table.setdefault(key, entry)
 
   def _crawlTaxTable(self, url):
-    tree = None
-    try:
-       tree = parse('ContribFont2012a2015.html')
-    except:
-       tree = parse(self.tax_table_url)
+    tree = parse(self.tax_table_url)
     headers = tree.xpath("//tr/td[@valign='MIDDLE']")
     values = tree.xpath("//tr/td[@valign='TOP']")
     base = -1
@@ -47,12 +43,14 @@ class LionTax:
         m = re.search(' (\d\.\d\d\d),(\d\d)</span>', txt)
         assert(m)
         base = float(re.sub('\.', '', m.group(1))) + float(m.group(2))/100
+        if 'Acima' in txt:
+          base = float("inf")
       elif celltype == 1:
         m = re.search('>((\d?\d),(\d)|-)</p>', txt)
         assert(m)
         tax = 0
         if m.group(1) != '-':
-          tax = float(m.group(2)) + float(m.group(3))/100
+          tax = float(m.group(2)) + float(m.group(3))/10
       elif celltype == 2:
         m = re.search('>((\d\d\d),(\d\d)|-)</p>', txt)
         assert(m)
@@ -102,21 +100,25 @@ class LionTax:
     year = 0
     if nodeyear is not None:
       m = re.search(year_regexp, tostring(nodeyear).decode('utf-8'))
-      year = int(m.group(1))
-      return datetime.date(year=year, month=month, day=1).isoformat()
+      year = int(m.group(2))
+      return datetime.date(year=year, month=month, day=1)
     return None
 
-  def calculateTax(self, value, date):
-    pivot = '%s:%s' % (datetime.date(year=1990, month=1, day=1), format(0, '010.2f'))
-    tbl = [ pivot ] + sorted(self.tax_table.keys())
-    key = datetime.date(year=date.year, month=date.month, day=1).isoformat()
-    key = '%s:%s' % (key, format(value, '010.2f'))
-    entry_key = tbl[bisect.bisect_left(tbl, key) - 1]
-    if entry_key == pivot:
-       err = 'No tax data available for date %s' % date.isoformat()
-       print(err)
-       sys.exit(-1)
-    entry = self.tax_table[entry_key]
+  def calculateTax(self, datestr, value):
+    date = dateutil.parser.parse(datestr)
+    date = datetime.date(year=date.year, month=date.month, day=date.day)
+    # Linear sort is simple because otherwise we need to break date and value
+    # components
+    key = '%s:%s' % (date, format(value, '010.2f'))
+    entry_key = None
+    entry = None
+    for k, v in sorted(self.tax_table.items()):
+      if v.date > date:
+        break
+      if value < v.base:
+        if entry is None or entry.date != v.date:
+          entry_key = k
+          entry = v
     tax = value * (entry.tax/100) - entry.deduction
     return tax
 
@@ -124,7 +126,6 @@ class LionTax:
 
 if __name__ == '__main__':
   value = float(sys.argv[1])
-  date = dateutil.parser.parse(sys.argv[2])
   calculator = LionTax('xchgrate')
-  tax = calculator.calculateTax(value, date)
-  print('R$%f @%s gives tax of %f\n' %(value, sys.argv[2], tax))
+  tax = calculator.calculateTax(sys.argv[2], value)
+  print('R$%f @%s gives tax of %f' %(value, sys.argv[2], tax))

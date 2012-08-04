@@ -33,11 +33,8 @@ class ExchangeRateDB:
     while days_past < 4:  # there is never so many holidays
       url = self.usdbrl_url % (date_start.day, date_start.month, date_start.year,
                                date_end.day, date_end.month, date_end.year)
-      print(date_start)
-      print(date_end)
       raw = urlopen(url).read().decode('utf-8')
       data = json.loads(raw)
-      print(data)
       if len(data[1]) == 0:
          days_past += 1
          date_start = date_start + dateutil.relativedelta.relativedelta(days=-1)
@@ -78,9 +75,22 @@ class ExchangeRateDB:
       self._crawlGoogValue(date)
     return self.goog_db[key]
 
+  def getTaxUSDBRL(self, datestr):
+    # http://economia.uol.com.br/impostoderenda/ultimas-noticias/infomoney/2012/03/06/ir-2012-rendimentos-e-pagamentos-em-dolar-devem-ser-convertidos.jhtm
+    # http://www.receita.fazenda.gov.br/pessoafisica/irpf/2012/perguntao/perguntas/pergunta-156.htm
+    date = dateutil.parser.parse(datestr)
+    taxdate = date + dateutil.relativedelta.relativedelta(months=-1)
+    taxdate = datetime.date(taxdate.year, taxdate.month, day=15)
+    # GetUSDBRL will use the last workday regardless of holiday. We just do the
+    # weekend test for debugging convenience.
+    while taxdate.weekday() > 4:
+      taxdate = taxdate + dateutil.relativedelta.relativedelta(days=-1)
+    key = taxdate.isoformat()
+    return (key, self.getUSDBRL(key))
+
 if __name__ == '__main__':
-  xchgdb = ExchangeRateDB('xchgratio')
-  usdbrl = xchgdb.getUSDBRL(sys.argv[1])
+  xchgdb = ExchangeRateDB('xchgrate')
   goog = xchgdb.getGOOG(sys.argv[1])
-  print('usdbrl: %f goog: %f' % (usdbrl, goog))
+  date, usdbrl = xchgdb.getTaxUSDBRL(sys.argv[1])
+  print('usdbrl@%s: %f goog: %f' % (date, usdbrl, goog))
   sys.exit(0)
