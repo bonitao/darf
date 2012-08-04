@@ -9,6 +9,7 @@ import dateutil.relativedelta
 import dateutil.parser
 from urllib.request import urlopen
 from urllib.parse import quote_plus, urlencode
+from argparse import ArgumentParser, FileType
 import re
 import sys
 
@@ -90,7 +91,13 @@ class ExchangeRateDB:
 
 if __name__ == '__main__':
   xchgdb = ExchangeRateDB('xchgrate')
-  goog = xchgdb.getGOOG(sys.argv[1])
-  date, usdbrl = xchgdb.getTaxUSDBRL(sys.argv[1])
-  print('usdbrl@%s: %f goog: %f' % (date, usdbrl, goog))
+  parser = ArgumentParser()
+  parser.add_argument("date", help="The date to retrieve exchange rate for.",
+                       type=dateutil.parser.parse)
+  args = parser.parse_args()
+  goog = xchgdb.getGOOG(args.date.isoformat())
+  date, usdbrl = xchgdb.getTaxUSDBRL(args.date.isoformat())
+  print('usdbrl@%s: %f goog@%s: %f' % (
+      dateutil.parser.parse(date).strftime('%d-%b-%Y'), usdbrl,
+      args.date.strftime('%d-%b-%Y'), goog))
   sys.exit(0)

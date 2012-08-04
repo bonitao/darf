@@ -15,6 +15,7 @@ import re
 import shelve
 import sys
 from lxml.html import parse, submit_form, fromstring, tostring
+from argparse import ArgumentParser, FileType
 
 class LionTax:
   def __init__(self, dbpath):
@@ -104,8 +105,7 @@ class LionTax:
       return datetime.date(year=year, month=month, day=1)
     return None
 
-  def calculateTax(self, datestr, value):
-    date = dateutil.parser.parse(datestr)
+  def calculateTax(self, date, value):
     date = datetime.date(year=date.year, month=date.month, day=date.day)
     # Linear sort is simple because otherwise we need to break date and value
     # components
@@ -125,7 +125,10 @@ class LionTax:
 
 
 if __name__ == '__main__':
-  value = float(sys.argv[1])
+  parser = ArgumentParser()
+  parser.add_argument('income', type=float)
+  parser.add_argument('month', type=dateutil.parser.parse)
+  args = parser.parse_args()
   calculator = LionTax('xchgrate')
-  tax = calculator.calculateTax(sys.argv[2], value)
-  print('R$%f @%s gives tax of %f' %(value, sys.argv[2], tax))
+  tax = calculator.calculateTax(args.month, args.income)
+  print('R$%f @%s gives tax of %f' %(args.income, args.month.strftime('%b-%Y'), tax))
