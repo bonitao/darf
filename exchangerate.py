@@ -52,6 +52,7 @@ class ExchangeRateDB:
 
   def _crawlGoogValue(self, date):
     url = self.goog_url % quote_plus(date.strftime('%d %b, %Y'))
+    print('Getting goog from %s' % url)
     html = urlopen(url).read().decode('utf-8')
     m = re.search('(\d+\.\d\d)\n<td class="rgt rm">', html)
     goog_value = float(m.group(1))  # last match, closing time

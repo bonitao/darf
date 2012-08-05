@@ -20,9 +20,10 @@ class Sicalc:
     self.sicalc_dados = 'https://pagamento.serpro.gov.br/sicalcweb/DadosContrib.asp?AP=P'
     self.sicalc_darf = 'https://pagamento.serpro.gov.br/Darf/MontaSicalcWEBDarf.asp'
 
-  def GenerateDarf(self, cpf, month, main_tax):
+  def GenerateDarf(self, cpf, monthstr, main_tax):
+    month = dateutil.parser.parse(monthstr)
     tree_princ = parse(urlopen(self.sicalc_princ))
-    print('hidden params in %s: %s' % (self.sicalc_princ, str(tree_princ.xpath("//input[@type='hidden']"))))
+    # print('hidden params in %s: %s' % (self.sicalc_princ, str(tree_princ.xpath("//input[@type='hidden']"))))
     now = datetime.datetime.now()
     last_day_in_month = datetime.datetime(year=now.year, day=calendar.monthrange(now.year, now.month)[1], month=now.month).strftime('%d/%m/%Y')
     submission_timestamp = str(time.time())
@@ -30,10 +31,10 @@ class Sicalc:
     for el in tree_princ.xpath("//input[@type='hidden']"):
       params.setdefault(el.name, el.value)
     params = bytes(urlencode(params).encode('utf-8'))
-    print('Params for %s: %s' % (self.sicalc_pa, params))
+    # print('Params for %s: %s' % (self.sicalc_pa, params))
 
     tree_pa = parse(urlopen(self.sicalc_pa, data = params))
-    print('hidden params in %s: %s' % (self.sicalc_pa, str(tree_pa.xpath("//input[@type='hidden']"))))
+    # print('hidden params in %s: %s' % (self.sicalc_pa, str(tree_pa.xpath("//input[@type='hidden']"))))
     pa = datetime.datetime(month=month.month, year=month.year, day=1)
     formatted_pa = pa.strftime('%m/%Y')
     raw_pa = pa.strftime('%m%Y')
@@ -43,9 +44,9 @@ class Sicalc:
       params.setdefault(el.name, el.value)
     dat_pgt_tex = params['DatPgtTex']
     params = bytes(urlencode(params).encode('utf-8'))
-    print('Params for %s: %s' % (self.sicalc_venc, params))
+    # print('Params for %s: %s' % (self.sicalc_venc, params))
     tree_venc = parse(urlopen(self.sicalc_venc, data = params))
-    print('hidden params in %s: %s' % (self.sicalc_venc, str(tree_venc.xpath("//input[@type='hidden']"))))
+    # print('hidden params in %s: %s' % (self.sicalc_venc, str(tree_venc.xpath("//input[@type='hidden']"))))
 
     # DT_Consolidacao = min(UltDtSelic, DatPgtTex) in tree_venc form
     dt_consolidation = dat_pgt_tex
@@ -60,23 +61,23 @@ class Sicalc:
     for el in tree_venc.xpath("//input[@type='hidden']"):
       params.setdefault(el.name, el.value)
     params = bytes(urlencode(params).encode('utf-8'))
-    print('Params for %s: %s' % (self.sicalc_res, params))
+    # print('Params for %s: %s' % (self.sicalc_res, params))
     tree_res = parse(urlopen(self.sicalc_res, data = params))
-    print('hidden params in %s: %s' % (self.sicalc_res, str(tree_res.xpath("//input[@type='hidden']"))))
+    # print('hidden params in %s: %s' % (self.sicalc_res, str(tree_res.xpath("//input[@type='hidden']"))))
 
     params = { 'Num_Princ': cpf[:-2], 'Num_DV': cpf[-2:], 'TipTributoReceita': '1', 'js': 's' }
     for el in tree_res.xpath("//input[@type='hidden']"):
       params.setdefault(el.name, el.value)
     params = bytes(urlencode(params).encode('utf-8'))
-    print('Params for %s: %s' % (self.sicalc_dados, params))
+    # print('Params for %s: %s' % (self.sicalc_dados, params))
     tree_dados = parse(urlopen(self.sicalc_dados, data = params))
-    print('hidden params in %s: %s' % (self.sicalc_dados, str(tree_dados.xpath("//input[@type='hidden']"))))
+    # print('hidden params in %s: %s' % (self.sicalc_dados, str(tree_dados.xpath("//input[@type='hidden']"))))
 
     params = {}
     for el in tree_dados.xpath("//input[@type='hidden']"):
       params.setdefault(el.name, el.value)
     params = bytes(urlencode(params).encode('utf-8'))
-    print('Params for %s: %s' % (self.sicalc_darf, params))
+    # print('Params for %s: %s' % (self.sicalc_darf, params))
     darf = urlopen(self.sicalc_darf, data = params).read().decode('ISO-8859-1')
     darf = darf.replace('./', 'https://pagamento.serpro.gov.br/Darf/')
     # Remove 404
