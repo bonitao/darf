@@ -1,6 +1,7 @@
 #!/usr/local/homebrew/bin/python3
 
 import argparse
+import logging
 import shelve
 import bisect
 import datetime
@@ -34,6 +35,7 @@ class ExchangeRateDB:
     while days_past < 4:  # there is never so many holidays
       url = self.usdbrl_url % (date_start.day, date_start.month, date_start.year,
                                date_end.day, date_end.month, date_end.year)
+      logging.debug('Getting usdbrl from %s' % url)
       raw = urlopen(url).read().decode('utf-8')
       data = json.loads(raw)
       if len(data[1]) == 0:
@@ -52,7 +54,7 @@ class ExchangeRateDB:
 
   def _crawlGoogValue(self, date):
     url = self.goog_url % quote_plus(date.strftime('%d %b, %Y'))
-    print('Getting goog from %s' % url)
+    logging.debug('Getting goog from %s' % url)
     html = urlopen(url).read().decode('utf-8')
     m = re.search('(\d+\.\d\d)\n<td class="rgt rm">', html)
     goog_value = float(m.group(1))  # last match, closing time

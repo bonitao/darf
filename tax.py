@@ -126,7 +126,7 @@ class LionTax:
 
 if __name__ == '__main__':
   parser = ArgumentParser()
-  parser.add_argument('income', type=float)
+  parser.add_argument('brl_income', type=float)
   parser.add_argument('month', type=dateutil.parser.parse)
   args = parser.parse_args()
   calculator = LionTax('xchgrate')

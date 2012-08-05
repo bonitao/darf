@@ -53,6 +53,12 @@ class GsuIrpf:
       if len(row) < 5 or row[0] == 'Transaction Date' or not row[0]:
         continue
       txn = Transaction(row)
+      if txn.ttype != 'Release':
+        logging.debug('Skipped transaction %s @%s' % (txn.ttype, txn.date))
+        continue
+      if dateutil.parser.parse(txn.date).year < 2012:
+        logging.debug('Skipped transaction %s @%s previous to 2012.' %(txn.ttype, txn.date))
+        continue
       txn.price = round(self.xchgdb.getGOOG(txn.date)*100)/100
       (txn.usdbrl_date, txn.usdbrl) = self.xchgdb.getTaxUSDBRL(txn.date)
       txn.usdbrl = round(txn.usdbrl*100)/100
@@ -69,9 +75,6 @@ class GsuIrpf:
     income_by_month = {}
     transactions = self._ParseTransactions(benefit_access_csv)
     for txn in transactions:
-      if txn.ttype != 'Release':
-        logging.debug('Skipped transaction %s @%s', txn.ttype, txn.date)
-        continue
       brl_release_value = round(txn.price * txn.usdbrl * txn.shares * 100)/100
       format_tuple = (txn.date, txn.shares, brl_release_value,
                       txn.price, txn.date, txn.usdbrl, txn.usdbrl_date)

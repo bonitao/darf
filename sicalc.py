@@ -88,7 +88,7 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument("cpf", help="Cadastro de Pessoa Fisica")
     parser.add_argument('month', type=dateutil.parser.parse)
-    parser.add_argument("value", help="Imposto a pagar (principal)", type=float)
+    parser.add_argument("brl_tax", help="Imposto a pagar (principal)", type=float)
     parser.add_argument("--output-file")
     args = parser.parse_args()
 
