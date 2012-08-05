@@ -130,5 +130,5 @@ if __name__ == '__main__':
   parser.add_argument('month', type=dateutil.parser.parse)
   args = parser.parse_args()
   calculator = LionTax('xchgrate')
-  tax = calculator.calculateTax(args.month.isoformat(), args.income)
-  print('R$%f @%s gives tax of %f' %(args.income, args.month.strftime('%b-%Y'), tax))
+  tax = calculator.calculateTax(args.month.isoformat(), args.brl_income)
+  print('R$%f @%s gives tax of R$%f' %(args.brl_income, args.month.strftime('%b-%Y'), tax))

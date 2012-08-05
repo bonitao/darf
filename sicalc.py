@@ -93,7 +93,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     sicalc = Sicalc()
-    darf = sicalc.GenerateDarf(args.cpf, args.month, args.value)
+    darf = sicalc.GenerateDarf(args.cpf, args.month.isoformat(), args.brl_tax)
     output_file = args.output_file
     if not args.output_file:
       darf_date = args.month.strftime('%Y-%b')
@@ -101,3 +101,4 @@ if __name__ == '__main__':
       output_file = 'carne-leao-%s-darf-para-%s.html' % (darf_date, payment_date)
     f = codecs.open(output_file, 'w', 'latin1')
     f.write(darf)
+    print('Darf written at', output_file)

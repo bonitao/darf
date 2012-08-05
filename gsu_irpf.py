@@ -127,3 +127,5 @@ if __name__ == '__main__':
 
   gsu_irpf = GsuIrpf(args.output_dir)
   gsu_irpf.Generate(args.benefit_access_csv, args.cpf, args.start_date)
+  index_file = os.path.abspath(os.path.join(args.output_dir, 'index.html'))
+  print('Point your browser to file://%s' % index_file)
