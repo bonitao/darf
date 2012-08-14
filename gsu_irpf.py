@@ -100,6 +100,7 @@ class GsuIrpf:
       self._print(line)
 
     for month, income in sorted(income_by_month.items()):
+      main_tax = self.calculator.calculateTax(month, income)
       darf = self.sicalc.GenerateDarf(cpf, month, main_tax)
       darf_date = dateutil.parser.parse(month).strftime('%Y-%b')
       payment_date = datetime.datetime.now().strftime('%Y-%b')
