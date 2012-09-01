@@ -11,6 +11,7 @@ import dateutil.parser
 from urllib.request import urlopen
 from urllib.parse import quote_plus, urlencode
 from argparse import ArgumentParser, FileType
+import os
 import re
 import sys
 
@@ -24,7 +25,10 @@ that I care.
 class ExchangeRateDB:
   def __init__(self, dbpath):
     self.usdbrl_url = 'http://cotacoes.economia.uol.com.br/cambioJSONChart.html?type=range&cod=BRL&mt=off&begin=%d/%d/%d&end=%d/%d/%d'
-    self.goog_url = 'http://www.google.com/finance/historical?cid=694653&enddate=%s&num=1'
+    # Needs to use num=2 because Google not always give the exact date with
+    # num=2. For example, it gives me Jul 12 values for 11 Jul 2012. With num=2
+    # we can scan for the right date inside the page.
+    self.goog_url = 'http://www.google.com/finance/historical?cid=694653&enddate=%s&num=2'
     self.usdbrl_db = shelve.open(dbpath + '.usdbrl', writeback = True)
     self.goog_db = shelve.open(dbpath + '.goog', writeback = True)
 
@@ -56,7 +60,20 @@ class ExchangeRateDB:
     url = self.goog_url % quote_plus(date.strftime('%d %b, %Y'))
     logging.debug('Getting goog from %s' % url)
     html = urlopen(url).read().decode('utf-8')
-    m = re.search('(\d+\.\d\d)\n<td class="rgt rm">', html)
+    days_past = 0
+    m = None
+    while days_past < 4:  # there is never so many holidays
+      delta = dateutil.relativedelta.relativedelta(days=(-1*days_past))
+      scan_date = date + delta
+      html_date = scan_date.strftime('%b %d, %Y').replace(' 0', ' ')
+      pattern = '<td class="lm">%s.*?(\d+\.\d\d)\n<td class="rgt rm">' % html_date
+      logging.debug('Scanning html for pattern %s' % pattern)
+      regexp = re.compile(pattern, re.MULTILINE | re.DOTALL)
+      m = regexp.search(html)
+      if m:
+        break
+      else:
+        days_past = days_past + 1
     goog_value = float(m.group(1))  # last match, closing time
     assert(goog_value > 100 and goog_value < 1000)
     key = date.isoformat()
@@ -93,11 +110,14 @@ class ExchangeRateDB:
     return (key, self.getUSDBRL(key))
 
 if __name__ == '__main__':
-  xchgdb = ExchangeRateDB('xchgrate')
   parser = ArgumentParser()
   parser.add_argument("date", help="The date to retrieve exchange rate for.",
                        type=dateutil.parser.parse)
+  parser.add_argument("--debug_file", help="File for DEBUG level logging.")
   args = parser.parse_args()
+  if args.debug_file:
+    logging.basicConfig(level=logging.DEBUG, filename=args.debug_file)
+  xchgdb = ExchangeRateDB('xchgrate')
   goog = xchgdb.getGOOG(args.date.isoformat())
   date, usdbrl = xchgdb.getTaxUSDBRL(args.date.isoformat())
   print('usdbrl@%s: %f goog@%s: %f' % (
