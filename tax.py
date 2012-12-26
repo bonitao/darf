@@ -1,4 +1,4 @@
-#!/usr/local/homebrew/bin/python3
+#!/usr/bin/env python3
 
 # Crazy pickle wants this here
 class TaxTableEntry:

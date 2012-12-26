@@ -1,4 +1,4 @@
-#!/usr/local/homebrew/bin/python3
+#!/usr/bin/env python3
 
 from argparse import ArgumentParser, FileType
 from lxml.html import parse, submit_form, fromstring, tostring
