@@ -1,4 +1,4 @@
-#!/usr/local/homebrew/bin/python3
+#!/usr/bin/env python3
 
 import bisect
 import csv
@@ -45,7 +45,6 @@ class GsuIrpf:
     self.xchgdb = exchangerate.ExchangeRateDB('xchgrate')
     self.calculator = tax.LionTax('xchgrate')
     self.sicalc = sicalc.Sicalc()
-    self.darf_css='https://pagamento.serpro.gov.br/Darf/estiloDARF.css'
 
   def _ParseTransactions(self, benefit_access_csv):
     reader = csv.reader(benefit_access_csv)
@@ -89,7 +88,7 @@ class GsuIrpf:
 
     index_file = os.path.join(self.output_dir, 'index.html')
     index = open(index_file, 'w')
-    index.write('<html><head/><body><a href="%s">Click me</a> to fix ssl permissions if having rendering issues.<br/><br/>' % self.darf_css)
+    index.write('<html><head/><body>')
     index.write('Tax computation <a href="file://%s">log</a><br/><br/>' % os.path.abspath(self.logfile_name))
 
     summary = {}

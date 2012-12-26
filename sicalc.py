@@ -1,4 +1,4 @@
-#!/usr/local/homebrew/bin/python3
+#!/usr/bin/env python3
 
 from argparse import ArgumentParser, FileType
 from lxml.html import parse, submit_form, fromstring, tostring
@@ -82,6 +82,8 @@ class Sicalc:
     darf = darf.replace('./', 'https://pagamento.serpro.gov.br/Darf/')
     # Remove 404
     darf = darf.replace('<link rel="stylesheet" type="text/css" media="print" href="./estiloDARFprint.css" />', '')
+    # pagamento.serpro.gov.br has an expired SSL certificate.
+    darf = darf.replace('https://', 'http://')
     return darf
 
 if __name__ == '__main__':
