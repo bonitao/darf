@@ -61,18 +61,14 @@ DARFs, incluindo multa e juros se aplicável. Basta apenas escolher os que não
 foram pagos e pagá-los.
 
     ./gsu_irpf.py 12345678909 sample_benefit_access_csv.csv
-    
-    2012-08-01: vested 3 shares for total value R$3847.95 (1 GSU = 628.75
-    @2012-08-01, 1 USD = 2.04 @2012-07-13)
-    2012-03-26: vested 5 shares for total value R$5564.37 (1 GSU = 647.02
-    @2012-03-26, 1 USD = 1.72 @2012-02-15)
-    2012-03-25: vested 5 shares for total value R$5584.24 (1 GSU = 649.33
-    @2012-03-25, 1 USD = 1.72 @2012-02-15)
+	2012-08-01: vested 3 shares for total value R$3872.00 (1 GSU = 632.68 @2012-08-01, 1 USD = 2.04 @2012-07-13)
+    2012-03-26: vested 5 shares for total value R$5584.24 (1 GSU = 649.33 @2012-03-26, 1 USD = 1.72 @2012-02-15)
+    2012-03-25: vested 5 shares for total value R$5526.27 (1 GSU = 642.59 @2012-03-25, 1 USD = 1.72 @2012-02-15)
     ---
-    carne leao 2012-03: exterior 11148.61 imposto devido: 2309.34
-    carne leao 2012-08: exterior 3847.95 imposto devido: 301.66
+    carne leao 2012-03: exterior 11110.51 imposto devido: 2298.86
+    carne leao 2012-08: exterior 3872.00 imposto devido: 308.27
     Generated darf carne-leao-2012-Mar-darf-para-2012-Aug.html
     Generated darf carne-leao-2012-Aug-darf-para-2012-Aug.html
-    Point your browser to file:///Users/davi/code/darf/darfs/index.html
+    Point your browser to file://.../index.html
 
 [mssb]: http://benefitaccess.com/
