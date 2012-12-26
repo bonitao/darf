@@ -82,6 +82,8 @@ class Sicalc:
     darf = darf.replace('./', 'https://pagamento.serpro.gov.br/Darf/')
     # Remove 404
     darf = darf.replace('<link rel="stylesheet" type="text/css" media="print" href="./estiloDARFprint.css" />', '')
+    # pagamento.serpro.gov.br has an expired SSL certificate.
+    darf = darf.replace('https://', 'http://')
     return darf
 
 if __name__ == '__main__':
