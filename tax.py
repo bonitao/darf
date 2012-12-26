@@ -41,19 +41,19 @@ class LionTax:
       date = self._findDate(tree, v)
       celltype = i % 3
       if celltype == 0:
-        m = re.search(' (\d\.\d\d\d),(\d\d)</span>', txt)
+        m = re.search(' (\d\.\d\d\d),(\d\d)\s*</span>', txt)
         assert(m)
         base = float(re.sub('\.', '', m.group(1))) + float(m.group(2))/100
         if 'Acima' in txt:
           base = float("inf")
       elif celltype == 1:
-        m = re.search('>((\d?\d),(\d)|-)</p>', txt)
+        m = re.search('<p[^>]*>\s*((\d?\d),(\d)|-)\s*</p>', txt)
         assert(m)
         tax = 0
         if m.group(1) != '-':
           tax = float(m.group(2)) + float(m.group(3))/10
       elif celltype == 2:
-        m = re.search('>((\d\d\d),(\d\d)|-)</p>', txt)
+        m = re.search('<p[^>]*>\s*((\d\d\d),(\d\d)|-)\s*</p>', txt)
         assert(m)
         deduction = 0
         if m.group(1) != '-':
