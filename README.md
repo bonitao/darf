@@ -37,6 +37,10 @@ que o [carnê-leão][carneleao] faz.
     ./tax.py 5000 2012-Jan
     R$5000.000000 @Jan-2012 gives tax of R$618.470000
 
+O valor de entrada (no exemplo acima, 5000) corresponde à seguinte fórmula:
+
+    num. de ações × valor da ação × cotação do dólar
+
 [carneleao]: http://www.receita.fazenda.gov.br/PessoaFisica/CarneLeao/default.htm
 
 sicalc.py
