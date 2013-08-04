@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Pagamento de imposto</title>
+<style> </style>
+<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/smoothness/jquery-ui.min.css"/>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/i18n/jquery-ui-i18n.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+<script>
+//<![CDATA[
+ $(function() {
+    $.datepicker.setDefaults($.datepicker.regional['pt-BR'])
+    $('#vestingdate').datepicker();
+    $('#taxmonth').datepicker( {
+        changeMonth: true,
+        changeYear: true,
+        showButtonPanel: true,
+        dateFormat: 'MM yy',
+        onClose: function(dateText, inst) { 
+            var month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
+            var year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
+            $(this).datepicker('setDate', new Date(year, month, 1));
+        }
+    });
+  });
+
+var getUSDBRLForDate = function() {
+  request = $.getJSON(
+       "http://openexchangerates.org/api/latest.json?app_id=e9566249a33641ebb9c010a5dbd18a2f&callback=?")
+  request.done(function (json, textStatus, jqXHR){ console.log("Hooray, it worked!" + json.rates['BRL']); });
+  request.fail(function (jqXHR, textStatus, errorThrown){
+    console.error("The following error occured: "+ textStatus, errorThrown);
+  });
+  request.always(function () {});
+}
+
+var getGoog = function() {
+  // CSV cors unfriendly friend
+  // $.ajax({
+  //   url: "http://www.google.com/finance/historical?cid=694653&startdate=Aug+5%2C+2012&enddate=Aug+7%2C+2012&num=30&ei=Fwv-UbD1J4-slwOjugE&output=csv",
+  //   dataType: "text",
+  //   success: function(csv) {
+  //     close = csv.split("\n").slice(-2)[0].split(",").slice(-2)[0]
+  //     $("#last_weekday_goog").text(close)
+  //   },
+  // })
+
+  var start_date = '2013-07-10'
+  var end_date = '2013-07-11'
+  var yql = 'select * from yahoo.finance.historicaldata where symbol in ("GOOG") and startDate="{startDate}" and endDate="{endDate}"'
+  yql = yql.replace('{startDate}', start_date)
+  yql = yql.replace('{endDate}', end_date)
+  console.log('YQL: ' + yql)
+  yql_env = "store://datatables.org/alltableswithkeys"
+  var yahoo_finance_url = 'http://query.yahooapis.com/v1/public/yql?format=json&q=' + escape(yql) + '&env=' + escape(yql_env)
+  console.log('Yahoo url: ' + yahoo_finance_url)
+  $.getJSON(yahoo_finance_url, function(json) { $("#last_weekday_goog").text(json.query.results.quote[0]['Close'])})
+}
+
+$(window).ready(function () {
+})
+$(window).load(function () {
+  var last_week_day = new Date();
+  do {
+    last_week_day.setDate(last_week_day.getDate()-1);
+  } while (last_week_day.getDay() == 6 || last_week_day.getDay() == 0);
+  $("#last_weekday").text($.datepicker.formatDate($.datepicker.RFC_2822, last_week_day, $.datepicker.regional["pt-BR"]))
+  $.getJSON("http://openexchangerates.org/api/latest.json?app_id=e9566249a33641ebb9c010a5dbd18a2f&callback=?",
+            function(json) { $("#last_weekday_usdbrl").text(json.rates['BRL']) })
+
+  getGoog()
+
+  // $.getJSON("http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.historicaldata%20where%20symbol%20in%20%28%22GOOG%22%29and%20startDate%20%3D%20%222013-07-10%22%20and%20endDate%20%3D%20%222013-07-11%22&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys", function(json) { $("#last_weekday_goog").text(json.query.results.quote[0].Close); console.log(json.query.results.quote[0].Close) })
+
+ })
+//]]>
+</script>
+<style type="text/css"></style>
+</head>
+<body>
+<h2>Informações de referência</h2>
+
+No último dia útil, <span id="last_weekday"/>, o dólar estava cotado em R$<span id="last_weekday_usdbrl"/>,
+e a ação do Google estava cotada em US$ <span id="last_weekday_goog"/>.
+
+<hr/>
+
+<h2>Câmbio USD/BRL</h2>
+<p>Data do vesting: <input type="text" id="vestingdate"/><button onclick="getUSDBRLForDate()">Go</button></p>
+
+<hr/>
+
+<h2>Cálculo do imposto</h2>
+<p>Montante em US$: <input type="text" id="taxdollars"/> Mês de referência: <input type="text" id="taxmonth"/><button onclick="getUSDBRLForDate()">Go</button></p>
+
+
+</body>
+</html>

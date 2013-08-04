@@ -44,7 +44,6 @@ class GsuIrpf:
     self.output_dir = output_dir
     self.xchgdb = exchangerate.ExchangeRateDB('xchgrate')
     self.calculator = tax.LionTax('xchgrate')
-    self.sicalc = sicalc.Sicalc()
 
   def _ParseTransactions(self, benefit_access_csv):
     reader = csv.reader(benefit_access_csv)
@@ -93,6 +92,7 @@ class GsuIrpf:
 
     summary = {}
     for month, income in sorted(income_by_month.items()):
+      logging.debug("Calling ./tax.py %s %s" % (month, income))
       main_tax = self.calculator.calculateTax(month, income)
       line = 'carne leao %s: exterior %.2f imposto devido: %.2f' % (month, income, main_tax)
       summary.setdefault(month, line)
@@ -100,15 +100,25 @@ class GsuIrpf:
 
     for month, income in sorted(income_by_month.items()):
       main_tax = self.calculator.calculateTax(month, income)
-      darf = self.sicalc.GenerateDarf(cpf, month, main_tax)
+      darf_date = dateutil.parser.parse(month + "-01").strftime('%Y-%b')
+      payment_date = datetime.datetime.now().strftime('%Y-%b')
+      output_file = 'carne-leao-%s-darf-para-%s.html' % (darf_date, payment_date)
+      output_file = os.path.join(self.output_dir, output_file)
+      index.write('%s <-> <a href="file://%s">print</a><br/>\n' % (summary[month], os.path.abspath(output_file)))
+
+    for month, income in sorted(income_by_month.items()):
+      main_tax = self.calculator.calculateTax(month, income)
+      sicalcweb = sicalc.Sicalc()
+      logging.debug("Calling ./sicalc.py %s %s %f" % (cpf, month, main_tax))
+      darf = sicalcweb.GenerateDarf(cpf, month, main_tax)
       darf_date = dateutil.parser.parse(month).strftime('%Y-%b')
       payment_date = datetime.datetime.now().strftime('%Y-%b')
       output_file = 'carne-leao-%s-darf-para-%s.html' % (darf_date, payment_date)
       self._print('Generated darf %s' % output_file)
       output_file = os.path.join(self.output_dir, output_file)
-      index.write('%s <-> <a href="file://%s">print</a><br/>\n' % (summary[month], os.path.abspath(output_file)))
       f = codecs.open(output_file, 'w', 'latin1')
       f.write(darf)
+
     index.write('</body></html>')
 
 if __name__ == '__main__':

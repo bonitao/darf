@@ -106,7 +106,7 @@ class LionTax:
     return None
 
   def calculateTax(self, datestr, value):
-    date = dateutil.parser.parse(datestr)
+    date = dateutil.parser.parse(datestr + "-01")
     date = datetime.date(year=date.year, month=date.month, day=date.day)
     # Linear sort is simple because otherwise we need to break date and value
     # components
@@ -126,8 +126,8 @@ class LionTax:
 
 if __name__ == '__main__':
   parser = ArgumentParser()
-  parser.add_argument('brl_income', type=float)
   parser.add_argument('month', type=dateutil.parser.parse)
+  parser.add_argument('brl_income', type=float)
   args = parser.parse_args()
   calculator = LionTax('xchgrate')
   tax = calculator.calculateTax(args.month.isoformat(), args.brl_income)
