@@ -11,6 +11,9 @@
 <script>
 //<![CDATA[
  $(function() {
+
+    $(document).tooltip();  // enable tooltips as title attribute
+
     $.datepicker.setDefaults($.datepicker.regional['pt-BR'])
     $('#vestingdate').datepicker();
     $('#taxmonth').datepicker( {
@@ -24,19 +27,11 @@
             $(this).datepicker('setDate', new Date(year, month, 1));
         }
     });
+    $('#currencydate').datepicker();
+
   });
 
-var getUSDBRLForDate = function() {
-  request = $.getJSON(
-       "http://openexchangerates.org/api/latest.json?app_id=e9566249a33641ebb9c010a5dbd18a2f&callback=?")
-  request.done(function (json, textStatus, jqXHR){ console.log("Hooray, it worked!" + json.rates['BRL']); });
-  request.fail(function (jqXHR, textStatus, errorThrown){
-    console.error("The following error occured: "+ textStatus, errorThrown);
-  });
-  request.always(function () {});
-}
-
-var getGoog = function() {
+var getGoog = function(date, target) {
   // CSV cors unfriendly friend
   // $.ajax({
   //   url: "http://www.google.com/finance/historical?cid=694653&startdate=Aug+5%2C+2012&enddate=Aug+7%2C+2012&num=30&ei=Fwv-UbD1J4-slwOjugE&output=csv",
@@ -47,34 +42,140 @@ var getGoog = function() {
   //   },
   // })
 
-  var start_date = '2013-07-10'
-  var end_date = '2013-07-11'
+  // The yahoo api is a bit confusing. We start from a weekday, and ask for 7
+  // days earlier data, to account for holidays.
+  end_date = new Date(date.getTime())
+  end_date.setDate(end_date.getDate()+1)
+  end_date = previousWeekday(end_date)
+  start_date = new Date(end_date.getTime())
+  start_date.setDate(start_date.getDate() - 7)
+  var end_datestr = $.datepicker.formatDate($.datepicker.ISO_8601, end_date)
+  var start_datestr = $.datepicker.formatDate($.datepicker.ISO_8601, start_date)
   var yql = 'select * from yahoo.finance.historicaldata where symbol in ("GOOG") and startDate="{startDate}" and endDate="{endDate}"'
-  yql = yql.replace('{startDate}', start_date)
-  yql = yql.replace('{endDate}', end_date)
+  yql = yql.replace('{startDate}', start_datestr)
+  yql = yql.replace('{endDate}', end_datestr)
   console.log('YQL: ' + yql)
   yql_env = "store://datatables.org/alltableswithkeys"
   var yahoo_finance_url = 'http://query.yahooapis.com/v1/public/yql?format=json&q=' + escape(yql) + '&env=' + escape(yql_env)
   console.log('Yahoo url: ' + yahoo_finance_url)
-  $.getJSON(yahoo_finance_url, function(json) { $("#last_weekday_goog").text(json.query.results.quote[0]['Close'])})
+  return $.getJSON(yahoo_finance_url, function(json) {
+    if (json.query.count == 0) goog_value = 'broken'
+    else if (json.query.count == 1) goog_value = json.query.results.quote['Close']
+    else goog_value = json.query.results.quote[0]['Close']
+    $(target).text(goog_value);
+  })
 }
 
-$(window).ready(function () {
-})
-$(window).load(function () {
-  var last_week_day = new Date();
+var previousWeekday = function(day) {
+  var last_weekday = day
   do {
-    last_week_day.setDate(last_week_day.getDate()-1);
-  } while (last_week_day.getDay() == 6 || last_week_day.getDay() == 0);
-  $("#last_weekday").text($.datepicker.formatDate($.datepicker.RFC_2822, last_week_day, $.datepicker.regional["pt-BR"]))
-  $.getJSON("http://openexchangerates.org/api/latest.json?app_id=e9566249a33641ebb9c010a5dbd18a2f&callback=?",
-            function(json) { $("#last_weekday_usdbrl").text(json.rates['BRL']) })
+    last_weekday.setDate(last_weekday.getDate()-1);
+  } while (last_weekday.getDay() == 6 || last_weekday.getDay() == 0);
+  return last_weekday
+}
 
-  getGoog()
+var getExchangeRate = function(date, target) {
+  openexchangerates_tmpl = 'http://openexchangerates.org/api/historical/{date}.json?app_id=e9566249a33641ebb9c010a5dbd18a2f&callback=?'
+  openexchangerates_url = openexchangerates_tmpl.replace('{date}', $.datepicker.formatDate($.datepicker.ATOM, date))
+  console.log('openexchangerates url: ' + openexchangerates_url)
+  return $.getJSON(openexchangerates_url, function(json) { $(target).text(json.rates['BRL']) }) 
+}
 
-  // $.getJSON("http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.historicaldata%20where%20symbol%20in%20%28%22GOOG%22%29and%20startDate%20%3D%20%222013-07-10%22%20and%20endDate%20%3D%20%222013-07-11%22&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys", function(json) { $("#last_weekday_goog").text(json.query.results.quote[0].Close); console.log(json.query.results.quote[0].Close) })
+var updateTaxableIncome = function() {
+  var sharecount = $('#sharecount').val()
+  var vestingdate = $('#vestingdate').datepicker('getDate')
 
- })
+  var currencydate = new Date(vestingdate.getTime())
+  currencydate.setMonth(currencydate.getMonth() - 1)
+  currencydate.setDate(16)
+  currencydate = previousWeekday(currencydate)
+  $('#currencydate').datepicker('setDate', currencydate)
+  $('#taxable_a').text(sharecount)
+  console.log($.datepicker.formatDate($.datepicker.ATOM, vestingdate))
+  rpc1 = getGoog(vestingdate, '#taxable_b')
+  rpc2 = getExchangeRate(currencydate, '#taxable_c')
+  $.when(rpc1, rpc2).then(function() {
+    console.log($('#taxable_a').text() + "*" + $('#taxable_b').text() + "*" + $('#taxable_c').text())
+    taxable = parseFloat($('#taxable_a').text()) *
+              parseFloat($('#taxable_b').text()) *
+              parseFloat($('#taxable_c').text())
+    $('#taxable').text(taxable)
+  })
+}
+
+var parseHTML = function(html) {
+  // There is no easy html parser available in chrome. See
+  // https://code.google.com/p/chromium/issues/detail?id=265379
+  var dom = document.implementation.createHTMLDocument('');
+  dom.documentElement.innerHTML = html;
+  return dom;
+}
+
+var downloadTaxTable = function() {
+  taxtable_url = 'http://www.receita.fazenda.gov.br/aliquotas/ContribFont2012a2015.htm'
+  return $.get(taxtable_url, function(data) {
+    var dom = parseHTML(data)
+    // We only look at ano-calendário 2013 and 2014.
+    for (var y = 1; y < 4; y++) {
+      var year = (2011 + y).toString()
+      // Crazy selector because the first two tables (which are obsolete) are
+      // not inside .divMiolo, and not specifying it makes nth-of-type return multiple
+      // results.
+      table_selector = '.divMiolo>table:nth-of-type('+y+') [lang="PT-BR"]'
+      $(table_selector, dom).each(function(i, value) {
+        // The table format is a bit crazy, using brazilian format, explicit
+        // ranges when only open side woud suffice, and dash to represent zero.
+        // Some string hacking transforms everything in numbers suitable to be
+        // converted to floats.
+        var row = $(value).text()
+        console.log('Year: ' + year + ' row ' + row)
+        row = row.replace(/\./g, '')
+        row = row.replace(/,/g, '.')
+        row = row.replace(/.* /g, '')
+        row = row.replace(/[^0-9-.]/g, '')
+        row = row.replace(/^-$/g, '0')
+        var val = parseFloat(row)
+        var selector = '#table' + year
+        selector = selector + ' tr:nth-of-type(' + Math.floor(i / 3 + 1) + ')'
+        selector = selector + ' td:nth-of-type(' + ((i % 3)+1) + ')'
+        if (!(i < 3)) {  // headers
+          console.log(selector)
+          console.log($(selector))
+          $(selector).text(val)
+        }
+      })
+    }
+  })
+}
+
+var updateMonthlyTax = function() {
+  var taxblr = $('#taxblr')
+  var taxmonth = $('#taxmonth').datepicker('getDate')
+  downloadTaxTable()
+}
+
+$(window).ready(function () {})
+$(window).load(function () {
+  var last_weekday = previousWeekday(new Date());
+  $('#last_weekday').text($.datepicker.formatDate($.datepicker.RFC_2822, last_weekday))
+  getExchangeRate(last_weekday, '#last_weekday_usdbrl')
+  getGoog(last_weekday, '#last_weekday_goog')
+
+  $('#vestingdate').datepicker('setDate', last_weekday)
+  $('#sharecount').val('1')
+  updateTaxableIncome()
+  $('#vestingdate').change(updateTaxableIncome)
+  $('#sharecount').change(updateTaxableIncome)
+
+  $('#taxblr').val(100)
+  month_day = last_weekday
+  month_day.setDate(1)
+  $('#taxmonth').datepicker('setDate', month_day)
+  updateMonthlyTax()
+  $('#taxblr').change(updateMonthlyTax)
+  $('#taxmonth').change(updateMonthlyTax)
+})
+
 //]]>
 </script>
 <style type="text/css"></style>
@@ -82,18 +183,62 @@ $(window).load(function () {
 <body>
 <h2>Informações de referência</h2>
 
+<p>
 No último dia útil, <span id="last_weekday"/>, o dólar estava cotado em R$<span id="last_weekday_usdbrl"/>,
 e a ação do Google estava cotada em US$ <span id="last_weekday_goog"/>.
+</p>
+<p>Confira os valores no <a target="_blank" href="http://www4.bcb.gov.br/pec/taxas/port/ptaxnpesq.asp?id=txcotacao">Banco Central</a> e <a target="_blank" href="https://www.google.com/finance/historical?q=NASDAQ%3AGOOG">Google Finance</a></p>
 
 <hr/>
 
-<h2>Câmbio USD/BRL</h2>
-<p>Data do vesting: <input type="text" id="vestingdate"/><button onclick="getUSDBRLForDate()">Go</button></p>
+<h2>Receita tributável por vesting</h2>
+<p>
+Número de ações: <input type="text" id="sharecount"/><br/>
+Data do vesting: <input type="text" id="vestingdate"/><br/>
+Data do câmbio: <input type="text" id="currencydate" disabled="disabled"/><br/>
+</p>
+
+<p>
+O valor da receita tributável (chamado principal) é calculado como (a) o número de ações multiplicado pelo (b) valor da
+ação em dólares no dia do vesting e convertido para reais pela valor da (c) cotação do último dia da primeira
+quinzena do mês anterior ao vesting, conforme o <a target="_blank" href="http://www.receita.fazenda.gov.br/pessoafisica/irpf/2012/perguntao/perguntas/pergunta-156.htm">perguntao da receita</a> e <a target="_blank" href="http://economia.uol.com.br/impostoderenda/ultimas-noticias/infomoney/2012/03/06/ir-2012-rendimentos-e-pagamentos-em-dolar-devem-ser-convertidos.jhtm">reportagem do UOL</a>.
+</p>
+
+<p><span id="taxable_a" title="número de ações vendidas na data"/> ×
+   <span id="taxable_b" title="valor da ação no dia do vesting em dólar"/> ×
+   <span id="taxable_c" title="cotação do último dia da primeira quinzena do mês anterior"/> =
+   <span id="taxable" title="receita tributável em reais"/>
+</p>
 
 <hr/>
 
-<h2>Cálculo do imposto</h2>
-<p>Montante em US$: <input type="text" id="taxdollars"/> Mês de referência: <input type="text" id="taxmonth"/><button onclick="getUSDBRLForDate()">Go</button></p>
+<h2>Cálculo do imposto mensal</h2>
+<p>
+<span title="Principal">Receita tributável</span> em R$: <input type="text" id="taxblr"/><br/>
+<span title="Mês em que as ações foram vested">Mês de referência</span>: <input type="text" id="taxmonth"/><br/>
+</p>
+
+O imposto é calculado de acordo com a tabela mensal 
+
+<table id="table2013" border="1" bgcolor="lightgray" >
+  <caption>Tabela de imposto 2013</caption>
+  <tr><th>Base</th><th>Alíquota</th><th>Dedução</th></tr>
+  <tr><td id="b1"/><td/><td/></tr>
+  <tr><td/><td/><td/></tr>
+  <tr><td/><td/><td/></tr>
+  <tr><td/><td/><td/></tr>
+  <tr><td/><td/><td/></tr>
+</table>
+
+<table id="table2014" border="1" bgcolor="lightgray" >
+  <caption>Tabela de imposto 2014</caption>
+  <tr><th>Base</th><th>Alíquota</th><th>Dedução</th></tr>
+  <tr><td id="b1"/><td/><td/></tr>
+  <tr><td/><td/><td/></tr>
+  <tr><td/><td/><td/></tr>
+  <tr><td/><td/><td/></tr>
+  <tr><td/><td/><td/></tr>
+</table>
 
 
 </body>
