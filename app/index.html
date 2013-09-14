@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="utf-8">
+<title>Pagamento de imposto</title>
+<script src="jquery.min.js"></script>
+<link rel="stylesheet" href="jquery-ui.min.css">
+<script src="jquery-ui.js"></script>
+<script src="jquery-ui-i18n.js"></script>
+<script src="jquery.csv-0.71.js"></script>
+<script src="jquery.dataTables.js"></script>
+<script src="jquery.multiselect.js"></script>
+<script src="darf.js"></script>
+</head>
+<body>
+<div id="tabs">
+  <ul>
+    <li><a href="#tabs-1">Informações de referência</a></li>
+    <li><a href="#tabs-2">Receita por lote</a></li>
+    <li><a href="#tabs-3">Cálculo do imposto mensal</a></li>
+    <li><a href="#tabs-4">DARFs</a></li>
+  </ul>
+  <div id="tabs-1"> <p>No último dia útil, <span id="last_weekday"></span>, o dólar estava cotado em R$ <span id="last_weekday_usdbrl"></span>,
+    e a ação do Google estava cotada em US$ <span id="last_weekday_goog"></span>.
+    </p>
+    <p>Confira os valores nas fontes abaixo.</p>
+    <div id="quotes_accordion">
+      <h3>Banco Central</h3>
+      <div id="bancocentral"><webview style="width:600px; height:200px" src="http://www4.bcb.gov.br/pec/taxas/port/ptaxnpesq.asp?id=txcotacao"></webview></div>
+      <h3>Yahoo Finance</h3>
+      <div id="yahoofinance"><webview style="width:600px; height:200px" src="http://finance.yahoo.com/q?s=GOOG"></webview></div>
+    </div>
+  </div>
+  <div id="tabs-2">
+    <p>
+      Número de ações: <input type="text" id="sharecount"/><br/>
+      Data do vesting: <input type="text" id="vestingdate"/><br/>
+      Data do câmbio: <input type="text" id="currencydate" disabled="disabled"/><br/>
+    </p>
+    <p>
+      O valor da receita tributável é calculado como (a) o número de ações multiplicado pelo (b) valor da
+      ação em dólares no dia do vesting e convertido para reais pela valor da
+      (c) cotação do último dia da primeira quinzena do mês anterior ao vesting, conforme o
+      <a target="_blank" href="http://www.receita.fazenda.gov.br/pessoafisica/irpf/2012/perguntao/perguntas/pergunta-156.htm">
+      perguntao da receita</a> e
+      <a target="_blank" href="http://economia.uol.com.br/impostoderenda/ultimas-noticias/infomoney/2012/03/06/ir-2012-rendimentos-e-pagamentos-em-dolar-devem-ser-convertidos.jhtm">reportagem do UOL</a>.
+    </p>
+    <p>
+      <span id="taxable_a" title="número de ações vendidas na data">1</span> ×
+      U$ <span id="taxable_b" title="valor da ação no dia do vesting em dólar">900</span> ×
+      R$/US$ <span id="taxable_c" title="cotação do último dia da primeira quinzena do mês anterior">2.0</span> =
+      R$ <span id="taxable" title="receita tributável em reais">?</span>
+    </p>
+  </div>
+  <div id="tabs-3">
+    <p>
+      <span title="Principal">Receita tributável</span> em R$: <input type="text" id="taxable_blr"/><br/>
+      <span title="Mês em que as ações foram vested">Mês de referência</span>: <input type="text" id="taxable_month"/><br/>
+    </p>
+    <p>
+    O imposto é calculado de acordo com a <a href="http://economia.uol.com.br/financas-pessoais/calculadoras/2013/01/14/carne-leao.htm" target="_blank">tabela anual</a>. O valor de entrada
+    corresponde a soma de todas as receitas tributáveis recebidas ao longo do mês.
+    O cálculo deve ser sempre feito após o recebimento do último lote do mês, caso
+    contrário a dedução será aplicada múltiplas vezes.
+    </p>
+    <table><tr><td>
+    <table id="table2013" border="1" bgcolor="lightgray" >
+      <caption>Tabela de imposto 2013</caption>
+      <tr><th>Base</th><th>Alíquota</th><th>Dedução</th></tr>
+      <tr><td id="b1"/><td/><td/></tr>
+      <tr><td/><td/><td/></tr>
+      <tr><td/><td/><td/></tr>
+      <tr><td/><td/><td/></tr>
+      <tr><td/><td/><td/></tr>
+    </table>
+    </td><td>
+    <table id="table2014" border="1" bgcolor="lightgray" >
+      <caption>Tabela de imposto 2014</caption>
+      <tr><th>Base</th><th>Alíquota</th><th>Dedução</th></tr>
+      <tr><td id="b1"/><td/><td/></tr>
+      <tr><td/><td/><td/></tr>
+      <tr><td/><td/><td/></tr>
+      <tr><td/><td/><td/></tr>
+      <tr><td/><td/><td/></tr>
+    </table>
+    </td></tr></table>
+    <p> Imposto a pagar: R$ <span id="monthly_a" title="Receita tributável total aferida no mês">1</span> ×
+                            <span id="monthly_b" title="Alíquota">1</span>% -
+                         R$ <span id="monthly_c" title="Dedução">1</span> =
+                         R$ <span id="monthly_d" title="Imposto devido">1</span>.
+    <p>Confira também usando o <a href="http://www.receita.fazenda.gov.br/PessoaFisica/Carneleao/2013/Java/ProgLeaoMultiplataforma2013.htm" target="_blank">Carnê-Leão</a> da receita federal.</p>
+  </div>
+  <div id="tabs-4">
+  <p>Transaction History CSV: <input type="file" name="filename" id="filename"></p>
+  <table id="txh_table" width='100%'>
+   <thead><tr><th>Data</th><th>Transação</th><th>Preço</th><th>Ações</th><th>Vencimentos</th><th>Imposto</th></tr></thead>
+  <tbody>
+    <tr><td>4 Jan</td><td>Venda</td><td>US$ 200</td><td>5</td><td>1000</td></tr>
+  </tbody>
+  </table>
+  <table width=100%><tr>
+     <td align=left><select id="darf_month" name="darf_month"><option value="2013-09-01">Agosto 2013</option></select></td>
+  <td align=right><button id="darf_button">Imprimir Darf</button></td>
+  </tr></table>
+
+  </div>
+</div>
+
+</body>
+</html>
