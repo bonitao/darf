@@ -17,7 +17,6 @@ $(function() {
       }
   });
   $('#currencydate').datepicker();
-
   $.fn.dataTableExt.sErrMode = 'throw'
   $('#txh_table').dataTable({
       'bJQueryUI': true,
@@ -27,17 +26,8 @@ $(function() {
       "bSort": false,
       "bInfo": false,
   })
-
   $('#darf_button').button()
-  $('#darf_month').multiselect({
-      multiple: false,
-      header: "Select an option",
-      noneSelectedText: "Select an Option",
-      selectedList: 1
-  })
-  $('#tabs').bind('tabsshow', function(event, ui) {
-    $('#darf_month').multiselect("refreshWidth");
-  })
+  $('#darf_month').select2()
 })
 
 var getGoog = function(date, target) {
@@ -46,14 +36,14 @@ var getGoog = function(date, target) {
   end_date.setDate(end_date.getDate()+1)
   end_date = previousWeekday(end_date)
   goog_tmpl = "http://www.google.com/finance/historical?cid=694653&startdate={date}&enddate={date}&num=30&output=csv",
-  date_str = $.datepicker.formatDate('M+d,yy', end_date, { monthNamesShort: $.datepicker.regional[""].monthNamesShort })
+  date_str = $.datepicker.formatDate('M+d,+yy', end_date, { monthNamesShort: $.datepicker.regional[""].monthNamesShort })
   goog_url = goog_tmpl.replace(new RegExp('{date}', 'g'), date_str)
   console.log(goog_url)
   jqxhr = $.get(goog_url, function(csv) {
       close = csv.split("\n")[1].split(",")[4]
       close = parseFloat(close).toFixed(2)
       $(target).text(close)
-    }).fail(function () {$("#last_weekday_goog").text("*erro*")})
+    }).fail(function () {$(target).text("*erro*")})
   return jqxhr
 }
 
@@ -87,7 +77,7 @@ var updateTaxableIncome = function() {
   console.log('Calling getGoog for ' + $.datepicker.formatDate($.datepicker.ATOM, vestingdate))
   rpc1 = getGoog(vestingdate, '#taxable_b').error(function() { console.log('getGoog failed') })
   rpc2 = getExchangeRate(currencydate, '#taxable_c').error(function() { console.log('getExchangeRate failed') })
-  $.when(rpc1, rpc2).then(function() {
+  return $.when(rpc1, rpc2).then(function() {
     console.log($('#taxable_a').text() + "*" + $('#taxable_b').text() + "*" + $('#taxable_c').text())
     $('#taxable_a').text(sharecount)
     taxable = parseFloat($('#taxable_a').text()) *
@@ -111,7 +101,53 @@ var updateDarfTable = function(e) {
   reader.readAsText(e.target.files[0])
   reader.onload = function(e) {
     var csv = e.target.result;
+    // Remove leading lines with different schema, but keep headers.
+    csv = csv.split('\n').slice(4).join('\n')
     var data = $.csv.toObjects(csv)
+    data = data.filter(function(e) { return e['Transaction Type'] == 'Release' })
+    data = data.filter(function(e) {
+      target_date = new Date()
+      target_date.setMonth(target_date.getMonth() - 1)
+      row_date = $.datepicker.parseDate('dd-M-yy', e['Transaction Date'], $.datepicker.regional[''])
+      keep = row_date.getMonth() == target_date.getMonth() && row_date.getYear() == target_date.getYear()
+      return keep
+    })
+    $('#txh_table').dataTable().fnClearTable()
+    for (var i = 0; i < data.length; i++) {
+      $('#txh_table').dataTable().fnAddData([
+        data[i]['Transaction Date'],
+        data[i]['Transaction Type'],
+        data[i]['Price'],
+        data[i]['Shares'],
+        data[i]['Net Proceeds']
+      ])
+    }
+    reqs = []
+    for (var i = 0; i < data.length; ++i) {
+     row_date = $.datepicker.parseDate('dd-M-yy', data[i]['Transaction Date'], $.datepicker.regional[''])
+     reqs.push(getGoog(row_date, '#txh_table tr:eq(' + (i+1) + ') td:eq(2)'))
+    }
+    $.when.apply($, reqs).then(function() {
+      month_total = 0
+      for (var i = 0; i < data.length; ++i) {
+        share_value = parseFloat($('#txh_table tr:eq(' + (i+1) + ') td:eq(2)').text())
+        share_count = parseInt($('#txh_table tr:eq(' + (i+1) + ') td:eq(3)').text())
+        value = (share_value * share_count)
+        if ($.isNumeric(value)) { value = value.toFixed(2) }
+        $('#txh_table').dataTable().fnUpdate(value, i, 4)
+        month_total = month_total + parseFloat(value)
+        console.log('darf table updated with ' + share_value + ' * ' + share_count + ' = ' + value)
+      }
+      $('#taxable_blr').val(month_total)
+      month_day = new Date()
+      month_day.setDate(1)
+      month_day.setMonth(month_day.getMonth()-1)
+      $('#taxable_month').datepicker('setDate', month_day)
+      updateTaxableIncome().done(function() {
+        $('#darf_value').text('R$ ' + $('#monthly_d').text())
+        $('#darf_value').tooltip({'content': $('#monthly_calculation').text()})
+      })
+    })
   }
 }
 
