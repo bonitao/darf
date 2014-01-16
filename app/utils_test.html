@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <meta charset="utf-8">
+   <title>Sicalc test</title>
+   <link rel="stylesheet" href="libs/qunit.css">
+   <script src="libs/jquery.min.js"></script>
+   <script src="libs/qunit.js"></script>
+   <script src="utils.js"></script>
+   <script>
+     test("parseHTML", function() {
+        expected = 'body contents'
+        html = "<html><body><div id='id'>" + expected + "</div></body></html>"
+        dom = parseHTML(html)
+        actual = $(dom, '#id').text()
+        equal(actual, expected)
+     });
+     test("previousWeekday", function() {
+        today = new Date("October 13, 1975")
+        expected = new Date("October 10, 1975")
+        actual = previousWeekday(today)
+        deepEqual(actual, expected)
+     });
+   </script>
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+</body>
+</html>

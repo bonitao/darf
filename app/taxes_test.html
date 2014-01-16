@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <meta charset="utf-8">
+   <title>Test calculating taxes related numbers</title>
+   <link rel="stylesheet" href="libs/jquery-ui.css">
+   <link rel="stylesheet" href="libs/qunit.css">
+   <script src="libs/qunit.js"></script>
+   <script src="libs/jquery.min.js"></script>
+   <script src="libs/jquery-ui.js"></script>
+   <script src="libs/jquery-ui-i18n.js"></script>
+   <script src="libs/jquery.dataTables.js"></script>
+   <script src="libs/jquery.mockjax.js"></script>
+   <script src="utils.js"></script>
+   <script src="taxes.js"></script>
+   <script>
+     asyncTest("taxableIncome", function() {
+       var vestingdate = new Date("January 2, 2014");
+       var sharecount = 5;
+       goog_promise = $.Deferred()
+       window.getGoog = function(d) { return goog_promise };
+       exchange_rate_promise = $.Deferred()
+       window.getExchangeRate = function(d) { return exchange_rate_promise };
+       p = taxableIncome(sharecount, vestingdate)
+       goog_promise.resolve(500)
+       exchange_rate_promise.resolve(2.4)
+       p.done(function(taxable_income_calculation) {
+         var taxable = taxable_income_calculation[0]
+         var goog = taxable_income_calculation[1]
+         var exchange_rate = taxable_income_calculation[2]
+         // Not the best expectation, but too lazy to prevent zero on both sides
+         deepEqual(taxable, sharecount * goog * exchange_rate)
+         start()  // return control to qunit
+       })
+     });
+     asyncTest("updateTaxTable", function() {
+       $('#qunit-fixture').html("<table id='table2014'>")
+       tax_table_url = 'http://www.receita.fazenda.gov.br/aliquotas/ContribFont2012a2015.htm'
+       html = $('#receita_tax_tables_html').contents().text()
+       $.mockjax({ url: tax_table_url, responseText: html })
+       updateTaxTable(2014).done(function() {
+         deepEqual($("#table2014 tr:eq(1) td:eq(0)").text(), '1787.77')
+         $.mockjaxClear()
+         start()  // return control to qunit
+       })
+     })
+   </script>
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+  <iframe src='testdata/receita_tax_tables.html.txt' width='0' height='0' style="visibility: hidden" id="receita_tax_tables_html"></iframe>
+</body>
+</html>

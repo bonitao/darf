@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <meta charset="utf-8">
+   <title>Test retrieving external financial data</title>
+   <link rel="stylesheet" href="libs/qunit.css">
+   <script src="libs/qunit.js"></script>
+   <script src="libs/jquery.min.js"></script>
+   <script src="libs/jquery-ui.js"></script>
+   <script src="libs/jquery-ui-i18n.js"></script>
+   <script src="libs/jquery.mockjax.js"></script>
+   <script src="utils.js"></script>
+   <script src="financial_data.js"></script>
+   <script>
+     asyncTest("updateGoog", function() {
+       var dateobj = new Date("January 13, 2014")
+       var google_finance_url = 'http://www.google.com/finance/historical?cid=694653&startdate=Jan+13,+2014&enddate=Jan+13,+2014&num=30&output=csv';
+       csv = $('#google_finance_historical_csv').contents().text()
+       $.mockjax({url: google_finance_url, responseText: csv });
+       element = '#qunit-fixture'
+       updateGoog(dateobj, element).done(function() {
+         equal($(element).text(), '1122.98')
+         $.mockjaxClear()
+         start()  // return control to qunit
+       })
+     });
+
+     asyncTest("updateExchangeRate", function() {
+       dateobj = new Date("October 13, 2013")
+       element = '#qunit-fixture'
+       open_exchange_rate_url = 'http://openexchangerates.org/api/historical/2013-10-13.json?app_id=e9566249a33641ebb9c010a5dbd18a2f'
+       json = $('#open_exchange_rates_historical_json').contents().text()
+       $.mockjax({ url: open_exchange_rate_url, responseText: json })
+       updateExchangeRate(dateobj, element).done(function() {
+         deepEqual($(element).text(), '2.18')
+         $.mockjaxClear()
+         start()  // return control to qunit
+       })
+     });
+   </script>
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+  <iframe src='testdata/google_finance_historical.csv.txt' width='0' height='0' style="visibility: hidden" id="google_finance_historical_csv"></iframe>
+  <iframe src='testdata/open_exchange_rates_historical.json.txt' width='0' height='0' style="visibility: hidden" id="open_exchange_rates_historical_json"></iframe>
+</body>
+</html>

@@ -12,6 +12,9 @@
 <script src="libs/jquery.csv.js"></script>
 <script src="libs/jquery.dataTables.js"></script>
 <script src="libs/select2.js"></script>
+<script src="utils.js"></script>
+<script src="financial_data.js"></script>
+<script src="taxes.js"></script>
 <script src="darf.js"></script>
 </head>
 <body>
@@ -27,7 +30,7 @@
     </p>
     <p>Confira os valores nas fontes abaixo.</p>
     <div id="quotes_accordion">
-      <h3>Banco Central</h3>
+      <h3>Bnco Central</h3>
       <div id="bancocentral"><webview style="width:600px; height:200px" src="http://www4.bcb.gov.br/pec/taxas/port/ptaxnpesq.asp?id=txcotacao"></webview></div>
       <h3>Yahoo Finance</h3>
       <div id="yahoofinance"><webview style="width:600px; height:200px" src="http://finance.yahoo.com/q?s=GOOG"></webview></div>
@@ -65,28 +68,18 @@
     O cálculo deve ser sempre feito após o recebimento do último lote do mês, caso
     contrário a dedução será aplicada múltiplas vezes.
     </p>
-    <table><tr><td>
-    <table id="table2013" border="1" bgcolor="lightgray" >
+    <table width="90%"><tr><td>
+    <table id="table2013" width='40%'>
       <caption>Tabela de imposto 2013</caption>
-      <tr><th>Base</th><th>Alíquota</th><th>Dedução</th></tr>
-      <tr><td id="b1"/><td/><td/></tr>
-      <tr><td/><td/><td/></tr>
-      <tr><td/><td/><td/></tr>
-      <tr><td/><td/><td/></tr>
-      <tr><td/><td/><td/></tr>
+      <thead><tr><th>Base</th><th>Alíquota</th><th>Dedução</th></tr></thead>
     </table>
     </td><td>
-    <table id="table2014" border="1" bgcolor="lightgray" >
+    <table id="table2014">
       <caption>Tabela de imposto 2014</caption>
-      <tr><th>Base</th><th>Alíquota</th><th>Dedução</th></tr>
-      <tr><td id="b1"/><td/><td/></tr>
-      <tr><td/><td/><td/></tr>
-      <tr><td/><td/><td/></tr>
-      <tr><td/><td/><td/></tr>
-      <tr><td/><td/><td/></tr>
+      <thead><tr><th>Base</th><th>Alíquota</th><th>Dedução</th></tr></thead>
     </table>
     </td></tr></table>
-    <p id='#monthly_calculation'> Imposto a pagar: R$ <span id="monthly_a" title="Receita tributável total aferida no mês">1</span> ×
+    <p id='monthly_calculation'> Imposto a pagar: R$ <span id="monthly_a" title="Receita tributável total aferida no mês">1</span> ×
                             <span id="monthly_b" title="Alíquota">1</span>% -
                          R$ <span id="monthly_c" title="Dedução">1</span> =
                          R$ <span id="monthly_d" title="Imposto devido">1</span>.

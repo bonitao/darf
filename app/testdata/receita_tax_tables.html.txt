@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <meta content="Microsoft FrontPage 6.0" name="GENERATOR"/>
+  <meta content="André Ricardo Gallas" name="Author"/>
+  <title>
+   Al&iacute;quotas do Imposto sobre a Renda Retido na Fonte - a partir do exerc&iacute;cio de 2012
+  </title>
+  <link href="/tema/css/rfb.css" rel="stylesheet" type="text/css"/>
+  <script src="/js/jquery/jquery.js" type="text/javascript">
+  </script>
+  <script data-main="/tema/main-built.js" src="/tema/require.js">
+  </script>
+ </head>
+ <body>
+  <div class="divMiolo">
+   <h2 class="Contexto">
+   </h2>
+   <h1 class="TituloPaginas">
+    Al&iacute;quotas do Imposto sobre a Renda Retido na Fonte - a partir do exerc&iacute;cio de 2012
+   </h1>
+   <span lang="PT-BR">
+    <b>
+    </b>
+    <p>
+     Rendimentos do Trabalho:
+    </p>
+    <b>
+     <p>
+      Tabelas Progressivas para o c&aacute;lculo mensal do Imposto sobre a Renda da Pessoa 
+F&iacute;sica para o exerc&iacute;cio de 2012, ano-calend&aacute;rio de 2011.
+     </p>
+    </b>
+    <p>
+     a) nos meses de janeiro a mar&ccedil;o:
+    </p>
+    <table border="1" dir="ltr" width="597">
+     <tbody>
+      <tr>
+       <td valign="MIDDLE">
+        <span lang="PT-BR">
+         <b>
+         </b>
+         <p align="CENTER">
+          <b>
+           Base de c&aacute;lculo mensal em R$
+          </b>
+         </p>
+        </span>
+       </td>
+       <td valign="MIDDLE">
+        <span lang="PT-BR">
+         <b>
+         </b>
+         <p align="CENTER">
+          <b>
+           Al&iacute;quota %
+          </b>
+         </p>
+        </span>
+       </td>
+       <td valign="MIDDLE">
+        <span lang="PT-BR">
+         <b>
+         </b>
+         <p align="CENTER">
+          <b>
+           Parcela a deduzir do imposto em R$
+          </b>
+         </p>
+        </span>
+       </td>
+      </tr>
+      <tr>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         At&eacute; 1.499,15
+        </span>
+       </td>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         <p align="CENTER">
+          -
+         </p>
+        </span>
+       </td>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         <p align="CENTER">
+          -
+         </p>
+        </span>
+       </td>
+      </tr>
+      <tr>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         De 1.499,16 at&eacute; 2.246,75
+        </span>
+       </td>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         <p align="CENTER">
+          7,5
+         </p>
+        </span>
+       </td>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         <p align="CENTER">
+          112,43
+         </p>
+        </span>
+       </td>
+      </tr>
+      <tr>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         De 2.246,76 at&eacute; 2.995,70
+        </span>
+       </td>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         <p align="CENTER">
+          15,0
+         </p>
+        </span>
+       </td>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         <p align="CENTER">
+          280,94
+         </p>
+        </span>
+       </td>
+      </tr>
+      <tr>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         De 2.995,71 at&eacute; 3.743,19
+        </span>
+       </td>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         <p align="CENTER">
+          22,5
+         </p>
+        </span>
+       </td>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         <p align="CENTER">
+          505,62
+         </p>
+        </span>
+       </td>
+      </tr>
+      <tr>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         Acima de 3.743,19
+        </span>
+       </td>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         <p align="CENTER">
+          27,5
+         </p>
+        </span>
+       </td>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         <p align="CENTER">
+          692,78
+         </p>
+        </span>
+       </td>
+      </tr>
+     </tbody>
+    </table>
+    <p>
+     b) nos meses de abril a dezembro:
+    </p>
+    <table border="1" dir="ltr" width="597">
+     <tbody>
+      <tr>
+       <td valign="MIDDLE">
+        <span lang="PT-BR">
+         <b>
+         </b>
+         <p align="CENTER">
+          <b>
+           Base de c&aacute;lculo mensal em R$
+          </b>
+         </p>
+        </span>
+       </td>
+       <td valign="MIDDLE">
+        <span lang="PT-BR">
+         <b>
+         </b>
+         <p align="CENTER">
+          <b>
+           Al&iacute;quota %
+          </b>
+         </p>
+        </span>
+       </td>
+       <td valign="MIDDLE">
+        <span lang="PT-BR">
+         <b>
+         </b>
+         <p align="CENTER">
+          <b>
+           Parcela a deduzir do imposto em R$
+          </b>
+         </p>
+        </span>
+       </td>
+      </tr>
+      <tr>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         At&eacute; 1.566,61
+        </span>
+       </td>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         <p align="CENTER">
+          -
+         </p>
+        </span>
+       </td>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         <p align="CENTER">
+          -
+         </p>
+        </span>
+       </td>
+      </tr>
+      <tr>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         De 1.566,62 at&eacute; 2.347,85
+        </span>
+       </td>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         <p align="CENTER">
+          7,5
+         </p>
+        </span>
+       </td>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         <p align="CENTER">
+          117,49
+         </p>
+        </span>
+       </td>
+      </tr>
+      <tr>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         De 2.347,86 at&eacute; 3.130,51
+        </span>
+       </td>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         <p align="CENTER">
+          15,0
+         </p>
+        </span>
+       </td>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         <p align="CENTER">
+          293,58
+         </p>
+        </span>
+       </td>
+      </tr>
+      <tr>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         De 3.130,52 at&eacute; 3.911,63
+        </span>
+       </td>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         <p align="CENTER">
+          22,5
+         </p>
+        </span>
+       </td>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         <p align="CENTER">
+          528,37
+         </p>
+        </span>
+       </td>
+      </tr>
+      <tr>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         Acima de 3.911,63
+        </span>
+       </td>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         <p align="CENTER">
+          27,5
+         </p>
+        </span>
+       </td>
+       <td valign="TOP">
+        <span lang="PT-BR">
+         <p align="CENTER">
+          723,95
+         </p>
+        </span>
+       </td>
+      </tr>
+     </tbody>
+    </table>
+    <b>
+     <p>
+      Tabela Progressiva para o c&aacute;lculo mensal do Imposto sobre a Renda da Pessoa 
+F&iacute;sica para o exerc&iacute;cio de 2013, ano-calend&aacute;rio de 2012.
+     </p>
+    </b>
+   </span>
+   <table border="1" dir="ltr" width="597">
+    <tbody>
+     <tr>
+      <td valign="MIDDLE">
+       <span lang="PT-BR">
+        <b>
+        </b>
+        <p align="CENTER">
+         <b>
+          Base de c&aacute;lculo mensal em R$
+         </b>
+        </p>
+       </span>
+      </td>
+      <td valign="MIDDLE">
+       <span lang="PT-BR">
+        <b>
+        </b>
+        <p align="CENTER">
+         <b>
+          Al&iacute;quota %
+         </b>
+        </p>
+       </span>
+      </td>
+      <td valign="MIDDLE">
+       <span lang="PT-BR">
+        <b>
+        </b>
+        <p align="CENTER">
+         <b>
+          Parcela a deduzir do imposto em R$
+         </b>
+        </p>
+       </span>
+      </td>
+     </tr>
+     <tr>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        At&eacute; 1.637,11
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         -
+        </p>
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         -
+        </p>
+       </span>
+      </td>
+     </tr>
+     <tr>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        De 1.637,12 at&eacute; 2.453,50
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         7,5
+        </p>
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         122,78
+        </p>
+       </span>
+      </td>
+     </tr>
+     <tr>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        De 2.453,51 at&eacute; 3.271,38
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         15,0
+        </p>
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         306,80
+        </p>
+       </span>
+      </td>
+     </tr>
+     <tr>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        De 3.271,39 at&eacute; 4.087,65
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         22,5
+        </p>
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         552,15
+        </p>
+       </span>
+      </td>
+     </tr>
+     <tr>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        Acima de 4.087,65
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         27,5
+        </p>
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         756,53
+        </p>
+       </span>
+      </td>
+     </tr>
+    </tbody>
+   </table>
+   <span lang="PT-BR">
+    <b>
+     <p>
+      Tabela Progressiva para o c&aacute;lculo mensal do Imposto sobre a Renda da Pessoa 
+F&iacute;sica para o exerc&iacute;cio de 2014, ano-calend&aacute;rio de 2013.
+     </p>
+    </b>
+   </span>
+   <table border="1" dir="ltr" width="597">
+    <tbody>
+     <tr>
+      <td valign="MIDDLE">
+       <span lang="PT-BR">
+        <b>
+        </b>
+        <p align="CENTER">
+         <b>
+          Base de c&aacute;lculo mensal em R$
+         </b>
+        </p>
+       </span>
+      </td>
+      <td valign="MIDDLE">
+       <span lang="PT-BR">
+        <b>
+        </b>
+        <p align="CENTER">
+         <b>
+          Al&iacute;quota %
+         </b>
+        </p>
+       </span>
+      </td>
+      <td valign="MIDDLE">
+       <span lang="PT-BR">
+        <b>
+        </b>
+        <p align="CENTER">
+         <b>
+          Parcela a deduzir do imposto em R$
+         </b>
+        </p>
+       </span>
+      </td>
+     </tr>
+     <tr>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        At&eacute; 1.710,78
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         -
+        </p>
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         -
+        </p>
+       </span>
+      </td>
+     </tr>
+     <tr>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        De 1.710,79 at&eacute; 2.563,91
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         7,5
+        </p>
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         128,31
+        </p>
+       </span>
+      </td>
+     </tr>
+     <tr>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        De 2.563,92 at&eacute; 3.418,59
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         15,0
+        </p>
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         320,60
+        </p>
+       </span>
+      </td>
+     </tr>
+     <tr>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        De 3.418,60 at&eacute; 4.271,59
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         22,5
+        </p>
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         577,00
+        </p>
+       </span>
+      </td>
+     </tr>
+     <tr>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        Acima de 4.271,59
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         27,5
+        </p>
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         790,58
+        </p>
+       </span>
+      </td>
+     </tr>
+    </tbody>
+   </table>
+   <span lang="PT-BR">
+    <b>
+     <p align="JUSTIFY">
+      Tabela Progressiva para o c&aacute;lculo mensal do Imposto sobre a 
+Renda da Pessoa F&iacute;sica a partir do exerc&iacute;cio de 2015, ano-calend&aacute;rio de 2014.
+     </p>
+    </b>
+   </span>
+   <table border="1" dir="ltr" width="597">
+    <tbody>
+     <tr>
+      <td valign="MIDDLE">
+       <span lang="PT-BR">
+        <b>
+        </b>
+        <p align="CENTER">
+         <b>
+          Base de c&aacute;lculo mensal em R$
+         </b>
+        </p>
+       </span>
+      </td>
+      <td valign="MIDDLE">
+       <span lang="PT-BR">
+        <b>
+        </b>
+        <p align="CENTER">
+         <b>
+          Al&iacute;quota %
+         </b>
+        </p>
+       </span>
+      </td>
+      <td valign="MIDDLE">
+       <span lang="PT-BR">
+        <b>
+        </b>
+        <p align="CENTER">
+         <b>
+          Parcela a deduzir do imposto em R$
+         </b>
+        </p>
+       </span>
+      </td>
+     </tr>
+     <tr>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        At&eacute; 1.787,77
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         -
+        </p>
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         -
+        </p>
+       </span>
+      </td>
+     </tr>
+     <tr>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        De 1.787,78 at&eacute; 2.679,29
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         7,5
+        </p>
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         134,08
+        </p>
+       </span>
+      </td>
+     </tr>
+     <tr>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        De 2.679,30 at&eacute; 3.572,43
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         15,0
+        </p>
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         335,03
+        </p>
+       </span>
+      </td>
+     </tr>
+     <tr>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        De 3.572,44 at&eacute; 4.463,81
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         22,5
+        </p>
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         602,96
+        </p>
+       </span>
+      </td>
+     </tr>
+     <tr>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        Acima de 4.463,81
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         27,5
+        </p>
+       </span>
+      </td>
+      <td valign="TOP">
+       <span lang="PT-BR">
+        <p align="CENTER">
+         826,15
+        </p>
+       </span>
+      </td>
+     </tr>
+    </tbody>
+   </table>
+   <span lang="PT-BR">
+    <b>
+     <p>
+      Rendimentos de Capital:
+     </p>
+    </b>
+    <p>
+     Fundos de longo prazo e aplica&ccedil;&otilde;es de renda fixa, em geral:
+    </p>
+    <blockquote>
+     <p>
+      - 22,5% para aplica&ccedil;&otilde;es com prazo de at&eacute; 180 
+								dias;
+      <br/>
+      - 20,0% para aplica&ccedil;&otilde;es com prazo de 181 at&eacute; 360 
+								dias;
+      <br/>
+      - 17,5% para aplica&ccedil;&otilde;es com prazo de 361 at&eacute; 720 
+								dias;
+      <br/>
+      - 15,0% para aplica&ccedil;&otilde;es com prazo acima de 720 
+								dias;
+     </p>
+    </blockquote>
+    <p>
+     Fundos de curto prazo:
+    </p>
+    <blockquote>
+     <p>
+      - 22,5% para aplica&ccedil;&otilde;es com prazo de at&eacute; 180 
+								dias;
+      <br/>
+      - 20,0% para aplica&ccedil;&otilde;es com prazo acima de 180 
+								dias;
+     </p>
+    </blockquote>
+    <p>
+     Fundos de a&ccedil;&otilde;es:
+    </p>
+    <blockquote>
+     <p>
+      - 15%;
+     </p>
+    </blockquote>
+    <p>
+     Aplica&ccedil;&otilde;es em renda vari&aacute;vel:
+    </p>
+    <blockquote>
+     <p>
+      - 0,005%;
+     </p>
+    </blockquote>
+    <b>
+    </b>
+    <p align="justify">
+     <b>
+      Remessas ao Exterior:
+     </b>
+     25% (rendimentos do trabalho, com ou sem v&iacute;nculo 
+empregat&iacute;cio, aposentadoria, pens&atilde;o por morte ou invalidez e os da presta&ccedil;&atilde;o de 
+servi&ccedil;os, pagos, creditados, entregues, empregados ou remetidos a n&atilde;o-residentes) 
+e 15% (demais rendimentos de fontes situadas no Brasil); e
+    </p>
+    <b>
+    </b>
+    <p align="justify">
+     <b>
+      Outros Rendimentos:
+     </b>
+     30% (pr&ecirc;mios e sorteios em dinheiro), 20% (pr&ecirc;mios e 
+sorteios sob a forma de bens e servi&ccedil;os), 1,5% (servi&ccedil;os de propaganda) e 1,5% 
+(remunera&ccedil;&atilde;o de servi&ccedil;os profissionais).
+    </p>
+   </span>
+   <p>
+    <a href="TabProgressivaCalcMens.htm">
+     Consultar tabelas de outros exerc&iacute;cios
+    </a>
+   </p>
+  </div>
+ </body>
+</html>
