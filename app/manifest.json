@@ -1,0 +1,22 @@
+{
+  "name": "Darf",
+  "manifest_version": 2,
+  "description": "Ajudando nos impostos.",
+  "version": "0.1",
+  "app": {
+    "background": {
+      "scripts": [ 
+        "app.js", "background.js", "darf.js",
+        "financial_data.js", "taxes.js", "utils.js",
+        "libs/jquery.min.js", "libs/jquery.min.map", 
+        "libs/jquery-ui.js", "libs/jquery-ui-i18n.js", "libs/jquery-ui.css",
+        "libs/jquery.csv.js",
+        "libs/jquery.dataTables.js",
+        "libs/select2.js",
+        "libs/qunit.js", "libs/qunit.css" ]
+    }
+  },
+  "permissions": [ "webview", "<all_urls>" ],
+  "icons": { "16": "lion.png", "128": "lion.png" },
+  "web_accessible_resources": ["images/*", "libs/images/*", "darf_tmpl_files/*" ]
+}
