@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <meta charset="utf-8">
+   <title>Test printing a darf</title>
+   <link rel="stylesheet" href="libs/jquery-ui.css">
+   <link rel="stylesheet" href="libs/qunit.css">
+   <script src="libs/qunit.js"></script>
+   <script src="libs/jquery.min.js"></script>
+   <script src="libs/accounting.js"></script>
+   <script src="sicalc.js"></script>
+   <script>
+     test("printDarf", function() {
+       html = $('#sicalweb_captcha_html').contents().text()
+       // $('#sicalcweb_captcha').contents().find('html').html(html)
+       ok(true)
+     });
+   </script>
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+  <iframe src='testdata/sicalcweb_captcha.html.txt' id="sicalcweb_captcha_html"></iframe>
+</body>
+</html>

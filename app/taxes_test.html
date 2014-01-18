@@ -14,22 +14,22 @@
    <script src="utils.js"></script>
    <script src="taxes.js"></script>
    <script>
-     asyncTest("taxableIncome", function() {
+     asyncTest("calculateTaxableIncome", function() {
        var vestingdate = new Date("January 2, 2014");
        var sharecount = 5;
        goog_promise = $.Deferred()
        window.getGoog = function(d) { return goog_promise };
        exchange_rate_promise = $.Deferred()
        window.getExchangeRate = function(d) { return exchange_rate_promise };
-       p = taxableIncome(sharecount, vestingdate)
+       p = calculateTaxableIncome(sharecount, vestingdate)
        goog_promise.resolve(500)
        exchange_rate_promise.resolve(2.4)
        p.done(function(taxable_income_calculation) {
-         var taxable = taxable_income_calculation[0]
-         var goog = taxable_income_calculation[1]
-         var exchange_rate = taxable_income_calculation[2]
-         // Not the best expectation, but too lazy to prevent zero on both sides
+         var taxable = taxable_income_calculation.taxable
+         var goog = taxable_income_calculation.goog
+         var exchange_rate = taxable_income_calculation.exchange_rate
          deepEqual(taxable, sharecount * goog * exchange_rate)
+         ok(taxable > 0)  // make above assertion a bit more robust
          start()  // return control to qunit
        })
      });
@@ -40,6 +40,26 @@
        $.mockjax({ url: tax_table_url, responseText: html })
        updateTaxTable(2014).done(function() {
          deepEqual($("#table2014 tr:eq(1) td:eq(0)").text(), '1787.77')
+         $.mockjaxClear()
+         start()  // return control to qunit
+       })
+     })
+     asyncTest("updateMonthlyTax", function() {
+       $('#qunit-fixture').append('<input id="taxable_blr" value="2500"/>')
+       $.each(["a", "b", "c", "d"], function(i, v) {
+         $('#qunit-fixture').append('<div id="monthly_' + v + '">')
+       })
+       $('#qunit-fixture').append('<div id="taxable_month">')
+       $.datepicker.setDefaults($.datepicker.regional['pt-BR'])
+       $('#taxable_month').datepicker()
+       tax_table_url = 'http://www.receita.fazenda.gov.br/aliquotas/ContribFont2012a2015.htm'
+       html = $('#receita_tax_tables_html').contents().text()
+       $.mockjax({ url: tax_table_url, responseText: html })
+       updateMonthlyTax().done(function() {
+         deepEqual($("#monthly_a").text(), '2500')
+         deepEqual($("#monthly_b").text(), '7.50')
+         deepEqual($("#monthly_c").text(), '134.08')
+         deepEqual($("#monthly_d").text(), '53.42')
          $.mockjaxClear()
          start()  // return control to qunit
        })

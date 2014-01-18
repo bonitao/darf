@@ -13,13 +13,13 @@
    <script src="financial_data.js"></script>
    <script>
      asyncTest("updateGoog", function() {
-       var dateobj = new Date("January 13, 2014")
-       var google_finance_url = 'http://www.google.com/finance/historical?cid=694653&startdate=Jan+13,+2014&enddate=Jan+13,+2014&num=30&output=csv';
+       var dateobj = new Date("Dec 25, 2013")
+       var google_finance_url = 'http://www.google.com/finance/historical?cid=694653&startdate=Dec+15,+2013&enddate=Dec+25,+2013&num=30&output=csv';
        csv = $('#google_finance_historical_csv').contents().text()
        $.mockjax({url: google_finance_url, responseText: csv });
        element = '#qunit-fixture'
        updateGoog(dateobj, element).done(function() {
-         equal($(element).text(), '1122.98')
+         equal($(element).text(), '1111.84')
          $.mockjaxClear()
          start()  // return control to qunit
        })

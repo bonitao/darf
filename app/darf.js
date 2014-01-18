@@ -1,139 +1,132 @@
-$(function() {
-  $(document).tooltip();  // enable tooltips as title attribute
-  $('#tabs').tabs()
-  $("#quotes_accordion" ).accordion({active: false});
-
-  $.datepicker.setDefaults($.datepicker.regional['pt-BR'])
-  $('#vestingdate').datepicker();
-  $('#taxable_month').datepicker({
-      changeMonth: true,
-      changeYear: true,
-      showButtonPanel: true,
-      dateFormat: 'MM yy',
-      onClose: function(dateText, inst) {
-        var month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
-        var year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
-        $(this).datepicker('setDate', new Date(year, month, 1));
-      }
-  });
-  $('#currencydate').datepicker();
-  $.fn.dataTableExt.sErrMode = 'throw'
-  $('#txh_table').dataTable({
-      'bJQueryUI': true,
-      "bPaginate": false,
-      "bLengthChange": false,
-      "bFilter": false,
-      "bSort": false,
-      "bInfo": false,
+/** Returns a { month: [{}]} object. The layout of the inner object is given by
+ * csv and only lines representing a share release are kept. The month key is a
+ * string formatted with datepicker.ATOM and day component fixed to 1.
+ */
+var parseBenefitAccessCsv = function(csv) {
+  // Remove leading lines with different schema, but keep headers.
+  csv = csv.split('\n').slice(4).join('\n')
+  var data = $.csv.toObjects(csv)
+  per_month_data = {}
+  data = data.filter(function(e) { return e['Transaction Type'] == 'Release' })
+  $.each(data, function(i, e) {
+    month_date = $.datepicker.parseDate(
+         'dd-M-yy', e['Transaction Date'], $.datepicker.regional[''])
+    month_date.setDate(1)
+    month = $.datepicker.formatDate($.datepicker.ATOM, month_date)
+    if (!(month in per_month_data)) per_month_data[month] = []
+    per_month_data[month].push(e)
   })
-  $('#darf_button').button()
-  $('#darf_month').select2()
-})
+  return per_month_data
+}
 
-var updateDarfTable = function(e) {
+/** Augments fields of per_month_data to have Price and Net Proceeds fields
+ * which are originally zeroed.
+ */
+var fillFinancialData = function(per_month_data) {
+  goog_rpcs = []
+  for (month in per_month_data) {
+    for (var i = 0; i < per_month_data[month].length; ++i) {
+      row = per_month_data[month][i]
+      row_date = $.datepicker.parseDate(
+           'dd-M-yy', row['Transaction Date'], $.datepicker.regional[''])
+      goog_rpcs.push(getGoog(row_date))
+    }
+  }
+  return $.when.apply($, goog_rpcs).then(function() {
+    var goog_array = $.makeArray(arguments);
+    for (month in per_month_data) {
+      for (var i = 0; i < per_month_data[month].length; ++i) {
+        row = per_month_data[month][i]
+        shares = parseFloat(row['Shares'])
+        price = parseFloat(goog_array.shift())
+        net_proceeds = price * shares
+        row['Price'] = price
+        row['Net Proceeds'] = net_proceeds
+      }
+    }
+    return per_month_data
+  })
+}
+
+var updateDarfTable = function(month, per_month_data) {
+  $('#txh_table').data(per_month_data)
+  months = Object.keys(per_month_data).sort()
+  if (month == null) month = months[0]
+  $('#txh_table').dataTable().fnClearTable()
+  for (var i = 0; i < per_month_data[month].length; i++) {
+    row = per_month_data[month][i]
+     $('#txh_table').dataTable().fnAddData([
+       row['Transaction Date'],
+       row['Transaction Type'],
+       row['Price'],
+       row['Shares'],
+       row['Net Proceeds']
+     ])
+  }
+  items = $.map(months, function(month, i) {
+    parsed_month = $.datepicker.parseDate($.datepicker.ATOM, month)
+    formatted_month = $.datepicker.formatDate('MM yy', parsed_month)
+    return { id: parsed_month.getTime(), text: formatted_month}
+  })
+  $('#darf_month_ui').removeClass('select2-offscreen').select2({ data: items });
+  $('#darf_month_ui').select2("data", items[0])
+  $('#darf_month_ui').select2("enable", true)
+  return $.Deferred().resolve().promise()
+}
+
+var updateIncomeAndTax = function() {
+  var per_month_data = $('#txh_table').data()
+  var month_date = new Date($('#darf_month_ui').select2('data').id)
+  var month = $.datepicker.formatDate($.datepicker.ATOM, month_date)
+  var data = per_month_data[month]
+  var income_value_usd = 0
+  for (var i = 0; i < data.length; ++i) {
+    share_value = parseFloat(data[i]['Price'])
+    share_count = parseInt(data[i]['Shares'])
+    release_value = (share_value * share_count)
+    income_value_usd += release_value
+  }
+  darf_exchange_rate_promise = getExchangeRate(
+      currencyConversionDate(month_date))
+  darf_taxable_blr_promise = $.when(darf_exchange_rate_promise).then(
+          function(exchange_rate) {
+    $('#darf_usd_income').text(income_value_usd.toFixed(2))
+    $('#darf_exchange_rate').text(exchange_rate.toFixed(2))
+    taxable_blr = income_value_usd * exchange_rate
+    $('#darf_blr_taxable').text(taxable_blr.toFixed(2))
+    $('#income_value').text(taxable_blr.toFixed(2))
+    $('#income_value').tooltip({'content': $('#darf_income_calculation').text()})
+    return taxable_blr
+  })
+  tax_tables_promise = downloadTaxTable()
+  all_done = $.when(darf_taxable_blr_promise, tax_tables_promise).then(
+       function(taxable_blr, tax_tables) {
+     tax_calculation = calculateMonthlyTax(taxable_blr, month_date, tax_tables)
+     $('#darf_taxable_blr').text(taxable_blr.toFixed(2))
+     $('#darf_tax_rate').text(tax_calculation.rate.toFixed(2))
+     $('#darf_tax_deduction').text(tax_calculation.deduction.toFixed(2))
+     $('#darf_tax_value').text(tax_calculation.tax_blr.toFixed(2))
+     $('#darf_value').text(tax_calculation.tax_blr.toFixed(2))
+     $('#darf_value').tooltip({'content': $('#darf_tax_calculation').text()})
+     return [taxable_blr, tax_calculation.tax_blr]
+  })
+  return all_done
+}
+
+var loadBenefitAccessCsv = function(csv) {
+  per_month_data = parseBenefitAccessCsv(csv)
+  fillFinancialData(per_month_data).then(function(per_month_data) {
+    $('#txh_table').data('per_month_data', per_month_data)
+    updateDarfTable(null, per_month_data)
+    updateIncomeAndTax().then(function() {
+      $('darf_button').prop("disabled", false);
+    })
+  })
+}
+
+var listenDarfTableFileUpload = function(e) {
   if (e.target.files == undefined) return
   var reader = new FileReader();
   reader.readAsText(e.target.files[0])
-  reader.onload = function(e) {
-    var csv = e.target.result;
-    // Remove leading lines with different schema, but keep headers.
-    csv = csv.split('\n').slice(4).join('\n')
-    var data = $.csv.toObjects(csv)
-    data = data.filter(function(e) { return e['Transaction Type'] == 'Release' })
-    data = data.filter(function(e) {
-      target_date = new Date()
-      target_date.setMonth(target_date.getMonth() - 1)
-      row_date = $.datepicker.parseDate('dd-M-yy', e['Transaction Date'], $.datepicker.regional[''])
-      keep = row_date.getMonth() == target_date.getMonth() && row_date.getYear() == target_date.getYear()
-      return keep
-    })
-    $('#txh_table').dataTable().fnClearTable()
-    for (var i = 0; i < data.length; i++) {
-      $('#txh_table').dataTable().fnAddData([
-        data[i]['Transaction Date'],
-        data[i]['Transaction Type'],
-        data[i]['Price'],
-        data[i]['Shares'],
-        data[i]['Net Proceeds']
-      ])
-    }
-    reqs = []
-    for (var i = 0; i < data.length; ++i) {
-     row_date = $.datepicker.parseDate('dd-M-yy', data[i]['Transaction Date'], $.datepicker.regional[''])
-     reqs.push(updateGoog(row_date, '#txh_table tr:eq(' + (i+1) + ') td:eq(2)'))
-    }
-    $.when.apply($, reqs).then(function() {
-      month_total = 0
-      for (var i = 0; i < data.length; ++i) {
-        share_value = parseFloat($('#txh_table tr:eq(' + (i+1) + ') td:eq(2)').text())
-        share_count = parseInt($('#txh_table tr:eq(' + (i+1) + ') td:eq(3)').text())
-        value = (share_value * share_count)
-        if ($.isNumeric(value)) { value = value.toFixed(2) }
-        $('#txh_table').dataTable().fnUpdate(value, i, 4)
-        month_total = month_total + parseFloat(value)
-        console.log('darf table updated with ' + share_value + ' * ' + share_count + ' = ' + value)
-      }
-      $('#taxable_blr').val(month_total)
-      month_day = new Date()
-      month_day.setDate(1)
-      month_day.setMonth(month_day.getMonth()-1)
-      $('#taxable_month').datepicker('setDate', month_day)
-      updateTaxableIncome().done(function() {
-        $('#darf_value').text('R$ ' + $('#monthly_d').text())
-        $('#darf_value').tooltip({'content': $('#monthly_calculation').text()})
-      })
-    })
-  }
+  reader.onload = function(e) { loadBenefitAccessCsv(e.target.result) }
 }
-
-var updateMonthlyTax = function() {
-  $('#monthly_d').text('?')
-  var rpc1 = updateTaxTable(2013)
-  var rpc2 = updateTaxTable(2014)
-  $.when(rpc1, rpc2).then(function() {
-    var taxable_blr = parseFloat($('#taxable_blr').val())
-    var year = $('#taxable_month').datepicker('getDate').getFullYear()
-    var break_loop = false
-    $('#table' + year + ' tr td:first-child').each(function(i, cell) {
-      if (break_loop) return
-      range = parseFloat($(cell).first().text())
-      console.log('Range: ' + range + ' Taxable: ' + taxable_blr)
-      rate = parseFloat($(cell).next().text())
-      deduction = parseFloat($(cell).next().next().text())
-      console.log('Rate: ' + rate + ' Deduction: ' + deduction)
-      if (range > taxable_blr) break_loop = true
-    })
-    console.log('Taxable brl: ' + taxable_blr)
-    $('#monthly_a').text(taxable_blr)
-    $('#monthly_b').text(rate)
-    $('#monthly_c').text(deduction)
-    tax_blr = taxable_blr * (rate/100) - deduction
-    $('#monthly_d').text(tax_blr.toFixed(2))
-  })
-}
-
-$(window).ready(function () {})
-$(window).load(function () {
-  var last_weekday = previousWeekday(new Date());
-  $('#last_weekday').text($.datepicker.formatDate($.datepicker.RFC_2822, last_weekday))
-  updateExchangeRate(last_weekday, '#last_weekday_usdbrl')
-  updateGoog(last_weekday, '#last_weekday_goog')
-
-  $('#vestingdate').datepicker('setDate', last_weekday)
-  $('#sharecount').val('5')
-  updateTaxableIncome()
-  $('#vestingdate').change(updateTaxableIncome)
-  $('#sharecount').change(updateTaxableIncome)
-
-  month_day = last_weekday
-  month_day.setDate(1)
-  month_day.setMonth(month_day.getMonth()-1)
-  $('#taxable_month').datepicker('setDate', month_day)
-  $('#taxable_blr').val(3000)
-  updateMonthlyTax()
-  $('#taxable_blr').change(updateMonthlyTax)
-  $('#taxable_month').change(updateMonthlyTax)
-
-  $('#txh_csv').change(updateDarfTable)
-
-})

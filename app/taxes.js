@@ -18,28 +18,26 @@ var currencyConversionDate = function(vestingdate) {
  * rounded %.2f value in BRL of tax to be paid and the values returned by
  * getGoog and getExchangeRate respectively.
  */
-var taxableIncome = function(sharecount, vestingdate) {
+var calculateTaxableIncome = function(sharecount, vestingdate) {
   var currencydate = currencyConversionDate(vestingdate)
   rpc1 = getGoog(vestingdate)
   rpc2 = getExchangeRate(currencydate)
-  return $.when(rpc1, rpc2).then(function(goog, exchangerate) {
-    taxable = sharecount * goog * exchangerate
-    return [taxable, goog, exchangerate]
+  return $.when(rpc1, rpc2).then(function(goog, exchange_rate) {
+   console.log("goog: " + goog)
+    taxable = sharecount * goog * exchange_rate
+    return { taxable: taxable, goog: goog, exchange_rate: exchange_rate }
   })
 }
 var updateTaxableIncome = function() {
-  sharecount = $('#sharecount').val();
-  vestingdate = $('#vestingdate').datepicker('getDate');
-  promise = taxableIncome(sharecount, vestingdate)
-  return promise.done(function(taxable_income_calculation) {
+  var sharecount = $('#sharecount').val();
+  var vestingdate = $('#vestingdate').datepicker('getDate');
+  var promise = calculateTaxableIncome(sharecount, vestingdate)
+  return promise.then(function(taxable_income_calculation) {
     $('#currencydate').datepicker('setDate', currencyConversionDate(vestingdate))
-    taxable = taxable_income_calculation[0]
-    goog = taxable_income_calculation[1]
-    exchangerate = taxable_income_calculation[2]
-    $('#taxable').text(taxable)
+    $('#taxable').text(taxable_income_calculation.taxable.toFixed(2))
     $('#taxable_a').text(sharecount)
-    $('#taxable_b').text(goog)
-    $('#taxable_c').text(exchangerate)
+    $('#taxable_b').text(taxable_income_calculation.goog.toFixed(2))
+    $('#taxable_c').text(taxable_income_calculation.exchange_rate.toFixed(2))
   })
 };
 
@@ -65,7 +63,7 @@ var downloadTaxTable = function() {
     for (var y = 1; y < 4; y++) {
       var year = 2011 + y
       tax_tables[year] = empty_table.slice(0)
-      console.log("Parsing year " + year)
+      // console.log("Parsing year " + year)
       // Crazy selector because the first two tables (which are obsolete) are
       // not inside .divMiolo, and not specifying it makes nth-of-type return
       // multiple results.
@@ -110,5 +108,34 @@ var updateTaxTable = function(year) {
       "aaData": tax_tables[year],
       "aoColumns": [ "Base", "Alíquota", "Dedução" ]
     })
+  })
+}
+var updateTaxTables = function() {
+  updateTaxTable(2013);
+  updateTaxTable(2014);
+}
+
+var calculateMonthlyTax = function(taxable_blr, tax_date, tax_tables) {
+  var year = tax_date.getFullYear()
+  var range = 0, rate = 0, deduction = 0
+  for (row_id in tax_tables[year]) {
+    range = parseFloat(tax_tables[year][row_id][0])
+    rate = parseFloat(tax_tables[year][row_id][1])
+    deduction = parseFloat(tax_tables[year][row_id][2])
+    if (range > taxable_blr) break;
+  }
+  tax_blr = taxable_blr * (rate / 100) - deduction
+  return { tax_blr: tax_blr, rate: rate, deduction: deduction }
+}
+
+var updateMonthlyTax = function() {
+  var tax_date = $('#taxable_month').datepicker('getDate')
+  var taxable_blr = parseFloat($('#taxable_blr').val())
+  return downloadTaxTable().then(function(tax_tables) {
+    var tax_computation = calculateMonthlyTax(taxable_blr, tax_date, tax_tables)
+    $('#monthly_a').text(taxable_blr)
+    $('#monthly_b').text(tax_computation.rate.toFixed(2))
+    $('#monthly_c').text(tax_computation.deduction.toFixed(2))
+    $('#monthly_d').text(tax_computation.tax_blr.toFixed(2))
   })
 }
