@@ -11,9 +11,8 @@ var updateSicalcView = function(sicalc, url) {
   var formatted_month = $.datepicker.formatDate('mm/yy', month_date)
   var tax_blr = parseFloat($('#darf_tax_value').text())
   tax_blr = accounting.formatNumber(tax_blr, 2, ".", ","); 
-  // Fake
-  cpf = '888642452'
-  cpf_dv = '35'
+  cpf = $('#cpf').val()
+  cpf_dv = $('#cpf_dv').val()
 
   jstmpl = "\ne = document.querySelector('{el}'); if (e != null) { e.value = '{value}' }"
   formdata = [ ['select[name=UF]', 'MG11'],
@@ -43,7 +42,7 @@ var updateSicalcView = function(sicalc, url) {
     console.log('Requesting html')
     sicalc.get(0).contentWindow.postMessage({ command: 'sendhtml' }, '*');
   } else {
-    console.log("Sending: " + script)
+    // console.log("Sending: " + script)
     sicalc.get(0).executeScript({ code: script });
   }
 }

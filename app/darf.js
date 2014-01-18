@@ -9,7 +9,7 @@ var parseBenefitAccessCsv = function(csv) {
   per_month_data = {}
   data = data.filter(function(e) { return e['Transaction Type'] == 'Release' })
   $.each(data, function(i, e) {
-    month_date = $.datepicker.parseDate(
+    var month_date = $.datepicker.parseDate(
          'dd-M-yy', e['Transaction Date'], $.datepicker.regional[''])
     month_date.setDate(1)
     month = $.datepicker.formatDate($.datepicker.ATOM, month_date)
@@ -48,36 +48,41 @@ var fillFinancialData = function(per_month_data) {
   })
 }
 
+/** Updates the view for the transaction table
+ * @param {string} Atom serialization of the first day of the month of interest.
+ * @param {} The data to store in the table.
+ * @return {Promise}
+ */
 var updateDarfTable = function(month, per_month_data) {
-  $('#txh_table').data(per_month_data)
-  months = Object.keys(per_month_data).sort()
-  if (month == null) month = months[0]
   $('#txh_table').dataTable().fnClearTable()
   for (var i = 0; i < per_month_data[month].length; i++) {
     row = per_month_data[month][i]
      $('#txh_table').dataTable().fnAddData([
        row['Transaction Date'],
        row['Transaction Type'],
-       row['Price'],
+       row['Price'].toFixed(2),
        row['Shares'],
-       row['Net Proceeds']
+       row['Net Proceeds'].toFixed(2)
      ])
   }
+  return $.Deferred().resolve().promise()
+}
+var populateMonthSelect = function(months) {
   items = $.map(months, function(month, i) {
     parsed_month = $.datepicker.parseDate($.datepicker.ATOM, month)
     formatted_month = $.datepicker.formatDate('MM yy', parsed_month)
     return { id: parsed_month.getTime(), text: formatted_month}
   })
-  $('#darf_month_ui').removeClass('select2-offscreen').select2({ data: items });
-  $('#darf_month_ui').select2("data", items[0])
+  $('#darf_month_ui').removeClass('select2-offscreen');
+  $('#darf_month_ui').select2({
+      initSelection: function (e, cb) { cb(items[items.length-1]) },
+      data: items
+  });
   $('#darf_month_ui').select2("enable", true)
-  return $.Deferred().resolve().promise()
 }
 
-var updateIncomeAndTax = function() {
-  var per_month_data = $('#txh_table').data()
-  var month_date = new Date($('#darf_month_ui').select2('data').id)
-  var month = $.datepicker.formatDate($.datepicker.ATOM, month_date)
+
+var updateIncomeAndTax = function(month, per_month_data) {
   var data = per_month_data[month]
   var income_value_usd = 0
   for (var i = 0; i < data.length; ++i) {
@@ -86,6 +91,7 @@ var updateIncomeAndTax = function() {
     release_value = (share_value * share_count)
     income_value_usd += release_value
   }
+  var month_date = $.datepicker.parseDate($.datepicker.ATOM, month)
   darf_exchange_rate_promise = getExchangeRate(
       currencyConversionDate(month_date))
   darf_taxable_blr_promise = $.when(darf_exchange_rate_promise).then(
@@ -113,13 +119,28 @@ var updateIncomeAndTax = function() {
   return all_done
 }
 
+var changeDarfTableMonth = function(e) {
+  var month_date = new Date(parseInt(e.val))
+  var per_month_data = $('#txh_table').data('per_month_data')
+  var month = $.datepicker.formatDate($.datepicker.ATOM, month_date)
+   updateDarfTable(month, per_month_data).then(function() {
+    return updateIncomeAndTax(month, per_month_data)
+  })
+  return false
+}
+
 var loadBenefitAccessCsv = function(csv) {
   per_month_data = parseBenefitAccessCsv(csv)
   fillFinancialData(per_month_data).then(function(per_month_data) {
     $('#txh_table').data('per_month_data', per_month_data)
-    updateDarfTable(null, per_month_data)
-    updateIncomeAndTax().then(function() {
-      $('darf_button').prop("disabled", false);
+    var months = Object.keys(per_month_data).sort()
+    populateMonthSelect(months)
+    var month_date = new Date($('#darf_month_ui').select2('data').id)
+    var month = $.datepicker.formatDate($.datepicker.ATOM, month_date)
+    updateDarfTable(month, per_month_data).then(function() {
+      updateIncomeAndTax(month, per_month_data).then(function() {
+        $('darf_button').prop("disabled", false);
+      })
     })
   })
 }

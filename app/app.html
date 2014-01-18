@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="utf-8">
+<title>Pagamento de imposto</title>
+<script src="libs/jquery.min.js"></script>
+<link rel="stylesheet" href="libs/jquery-ui.css">
+<link rel="stylesheet" href="libs/select2.css">
+<script src="libs/jquery-ui.js"></script>
+<script src="libs/jquery-ui-i18n.js"></script>
+<script src="libs/jquery.csv.js"></script>
+<script src="libs/jquery.dataTables.js"></script>
+<script src="libs/select2.js"></script>
+<script src="libs/accounting.js"></script>
+<script src="utils.js"></script>
+<script src="financial_data.js"></script>
+<script src="taxes.js"></script>
+<script src="darf.js"></script>
+<script src="app.js"></script>
+<script src="sicalc.js"></script>
+</head>
+<body>
+<div id="tabs">
+  <ul>
+    <li><a href="#tabs-1">Informações de referência</a></li>
+    <li><a href="#tabs-2">Receita por lote</a></li>
+    <li><a href="#tabs-3">Cálculo do imposto mensal</a></li>
+    <li><a href="#tabs-4">DARFs</a></li>
+  </ul>
+  <div id="tabs-1"> <p>No último dia útil, <span id="last_weekday"></span>, o dólar estava cotado em R$ <span id="last_weekday_usdbrl"></span>,
+    e a ação do Google estava cotada em US$ <span id="last_weekday_goog"></span>. Veja
+    abaixo as tabelas de imposto e fontes para conferência.</p>
+    <table width="90%"><tr><td>
+    <table id="table2013" width='40%'>
+      <caption>Tabela de imposto 2013</caption>
+      <thead><tr><th>Base</th><th>Alíquota</th><th>Dedução</th></tr></thead>
+    </table>
+    </td><td>
+    <table id="table2014">
+      <caption>Tabela de imposto 2014</caption>
+      <thead><tr><th>Base</th><th>Alíquota</th><th>Dedução</th></tr></thead>
+    </table>
+    </td></tr></table>
+
+    <div id="quotes_accordion">
+      <h3>Banco Central</h3>
+      <div id="bancocentral"><webview style="width:600px; height:200px" src="http://www4.bcb.gov.br/pec/taxas/port/ptaxnpesq.asp?id=txcotacao"></webview></div>
+      <h3>Yahoo Finance</h3>
+      <div id="yahoofinance"><webview style="width:600px; height:200px" src="http://finance.yahoo.com/q?s=GOOG"></webview></div>
+      <h3>Receita da Fazenda</h3>
+      <div id="receita"><webview style="width:600px; height:200px" src="http://receita.fazenda.gov.br/aliquotas/ContribFont2012a2015.htm"></webview></div>
+    </div>
+  </div>
+  <div id="tabs-2">
+    <form name="frm_taxable">
+    <p>
+      Número de ações: <input type="number" min="0" id="sharecount"/><br/>
+      Data do vesting: <input type="text" id="vestingdate"/><br/>
+      Data do câmbio: <input type="text" id="currencydate" disabled="disabled"/><br/>
+    </p>
+    <p>
+      O valor da receita tributável é calculado como (a) o número de ações multiplicado pelo (b) valor da
+      ação em dólares no dia do vesting e convertido para reais pela valor da
+      (c) cotação do último dia da primeira quinzena do mês anterior ao vesting, conforme o
+      <a target="_blank" href="http://www.receita.fazenda.gov.br/pessoafisica/irpf/2012/perguntao/perguntas/pergunta-156.htm">
+      perguntao da receita</a> e
+      <a target="_blank" href="http://economia.uol.com.br/impostoderenda/ultimas-noticias/infomoney/2012/03/06/ir-2012-rendimentos-e-pagamentos-em-dolar-devem-ser-convertidos.jhtm">reportagem do UOL</a>.
+    </p>
+    <p id="taxable_calculation" style="font-size:110%">Receita aferida: 
+      <span id="taxable_a" title="número de ações vendidas na data">1</span> ×
+      U$ <span id="taxable_b" title="valor da ação no dia do vesting em dólar">900</span> ×
+      R$/US$ <span id="taxable_c" title="cotação do último dia da primeira quinzena do mês anterior">2.0</span> =
+      R$ <span id="taxable" title="receita tributável em reais">?</span>
+    </p>
+    </form>
+  </div>
+  <div id="tabs-3">
+    <p>
+      <span title="Principal">Receita tributável</span> em R$: <input type="number" id="taxable_blr"/><br/>
+      <span title="Mês em que as ações foram vested">Mês de referência</span>: <input type="text" id="taxable_month"/><br/>
+    </p>
+    <p>
+    O imposto é calculado de acordo com a <a href="http://economia.uol.com.br/financas-pessoais/calculadoras/2013/01/14/carne-leao.htm" target="_blank">tabela anual</a>. O valor de entrada
+    corresponde a soma de todas as receitas tributáveis recebidas ao longo do mês.
+    O cálculo deve ser sempre feito após o recebimento do último lote do mês, caso
+    contrário a dedução será aplicada múltiplas vezes.
+    </p>
+    <div id='monthly_calculation' style="font-size:110%">
+       Imposto a pagar: R$ <span id="monthly_a" title="Receita tributável total aferida no mês">1</span> ×
+                           <span id="monthly_b" title="Alíquota">1</span>% -
+                         R$ <span id="monthly_c" title="Dedução">1</span> =
+                         R$ <span id="monthly_d" title="Imposto devido">1</span>.
+    </div><br/>
+    <p>Confira também usando o <a href="http://www.receita.fazenda.gov.br/PessoaFisica/Carneleao/2013/Java/ProgLeaoMultiplataforma2013.htm" target="_blank">Carnê-Leão</a> da receita federal.</p>
+  </div>
+  <div id="tabs-4">
+     <table><tr>
+     <td>Transaction History CSV: <input type="file" name="txh_csv" id="txh_csv"></td>
+     <td>CPF: <input type="text" id="cpf" size="9"> <input type="text" id="cpf_dv" maxlength="2" size="2"></td>
+     </tr></table>
+    <table id="txh_table" width='100%'>
+     <thead><tr><th>Data</th><th>Transação</th><th>Preço (US$)</th><th>Ações</th><th>Valor (US$)</th></tr></thead>
+    <tbody>
+      <tr><td>4 Jan</td><td>Venda</td><td>200</td><td>6</td><td>1000</td></tr>
+    </tbody>
+    </table>
+    <p id='darf_income_calculation' style="display: none;">Receita aferida:
+        US$ <span id="darf_usd_income" title="Receita tributável total aferida no mês em US$.">1</span> ×
+        R$/US$ <span id="darf_exchange_rate" title="Cotação do último dia útil da primeira quinzena do mês anterior.">2.0</span> =
+        R$ <span id="darf_blr_taxable" title="Receita tributável em reais">?</span>
+    </p>
+    <p id='darf_tax_calculation' style="display: none;">Imposto devido:
+         R$ <span id="darf_taxable_blr" title="Receita tributável total aferida no mês">1</span> ×
+            <span id="darf_tax_rate" title="Alíquota">1</span>% -
+         R$ <span id="darf_tax_deduction" title="Dedução">1</span> =
+         R$ <span id="darf_tax_value" title="Imposto devido">1</span>.
+    </p>
+
+    <table width=100%><tr>
+       <td align=left id="darf_month"><input type="hidden" id="darf_month_ui"> </td>
+      <td align=left>Receita: <span title="Receita aferida" class="ui-highlight-class" style="font-size:large;border:2px;padding:2px" id="income_value">R$ 1000</span></td>
+      <td align=right>Imposto: <span title="Imposto devido" class="ui-highlight-class" style="font-size:large;border:2px;padding:2px" id="darf_value">R$ 1000</span></td>
+      <td align=right><button id="darf_button">Imprimir Darf</button></td>
+    </tr></table>
+    <div><webview id="sicalc" style="width:620px; height:200px"></webview></div>
+    <iframe src='testdata/benefit_access_csv.txt' style="display: none;" id="benefit_access_csv"></iframe>
+  </div>
+</div>
+</body>
+</html>

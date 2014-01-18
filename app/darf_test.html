@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <meta charset="utf-8">
+   <title>Test calculating taxes related numbers</title>
+   <link rel="stylesheet" href="libs/jquery-ui.css">
+   <link rel="stylesheet" href="libs/qunit.css">
+   <link rel="stylesheet" href="libs/select2.css">
+   <script src="libs/qunit.js"></script>
+   <script src="libs/jquery.min.js"></script>
+   <script src="libs/jquery-ui.js"></script>
+   <script src="libs/jquery-ui-i18n.js"></script>
+   <script src="libs/jquery.csv.js"></script>
+   <script src="libs/jquery.dataTables.js"></script>
+   <script src="libs/jquery.mockjax.js"></script>
+   <script src="libs/select2.js"></script>
+   <script src="darf.js"></script>
+   <script>
+     test("parseBenefitAccessCsvTest", function() {
+       csv = $('#benefit_access_csv').contents().text()
+       data = parseBenefitAccessCsv(csv)
+       deepEqual(data['2013-08-01'][0]['Transaction Date'], '01-Aug-2013')
+       deepEqual(parseInt(data['2013-08-01'][0]['Shares']), 3)
+     });
+     asyncTest("fillFinancialData", function() {
+       per_month_data = { '2013-08-01' : 
+         [{ 'Transaction Date': '02-Aug-2013', 'Shares': '5' }]
+       }
+       window.getGoog = function(release_date) {
+         return $.Deferred().resolve(900).promise()
+       }
+       fillFinancialData(per_month_data).then(function() {
+         deepEqual(parseFloat(per_month_data['2013-08-01'][0]['Price']), 900)
+         deepEqual(parseFloat(per_month_data['2013-08-01'][0]['Net Proceeds']), 900 * 5)
+         start()  // return control to qunit
+       })
+     })
+     asyncTest("updateDarfTable", function() {
+       $('#qunit-fixture').append('<table id="txh_table"> <thead><tr><th>Data</th><th>Transação</th><th>Preço (US$)</th><th>Ações</th><th>Valor (US$)</th></tr></thead><tbody><tr><td>0</td><td>1</td><td>2</td><td>3</td>4<td></td></tr></tbody></table>')
+       $('#txh_table').dataTable()
+       $('#qunit-fixture').append('<div id="darf_month">')
+       $('#qunit-fixture').append('<input type="hidden" id="darf_month_ui">')
+       $('#darf_month_ui').select2({ data :[] })
+       $('#qunit-fixture').append('<div id="darf_value">')
+       $('#qunit-fixture').append('<div id="income_value">')
+       $.datepicker.setDefaults($.datepicker.regional['pt-BR'])
+       window.getGoog = function(release_date) {
+         return $.Deferred().resolve(900).promise()
+       }
+       window.currencyConversionDate = function(tax_month) {
+         return new Date(tax_month.getTime())
+       }
+       window.getExchangeRate = function(date) {
+         return $.Deferred().resolve(2.4).promise()
+       }
+       window.downloadTaxTable = function() {
+         tax_table = { 2013: [[100,0,0],[500, 27.5, 100]] }
+         return $.Deferred().resolve(tax_table).promise()
+       }
+       window.calculateMonthlyTax = function(taxable, tax_tables) {
+         row = tax_tables[2013][1]
+         tax = taxable * (row[1]/100) - row[2]
+         return { tax_blr: tax, rate: row[1], deduction: row[2] }
+       }
+       per_month_data = { '2013-08-01' : 
+         [{ 'Transaction Date': '02-Aug-2013', 'Transaction Type': 'Release',
+           'Shares': '5', 'Price': '800', 'Net Proceeds': (800*5).toString() }]
+       }
+       updateDarfTable(null, per_month_data).then(function() {
+         deepEqual($('#darf_month_ui').select2('data').text, 'Agosto 2013')
+         updateIncomeAndTax().then(function(income_and_tax) {
+           deepEqual(income_and_tax[0], 800*5*2.4)
+           deepEqual(income_and_tax[1], 800*5*2.4*(27.5/100) - 100)
+           start()  // return control to qunit
+         })
+       })
+     });
+   </script>
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+  <iframe src='testdata/benefit_access_csv.txt' width='0' height='0' style="visibility: hidden" id="benefit_access_csv"></iframe>
+</body>
+</html>
