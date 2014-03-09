@@ -62,13 +62,13 @@ var downloadTaxTable = function() {
     // We only look at ano-calendário 2013 and 2014.
     for (var y = 1; y < 4; y++) {
       var year = 2011 + y
-      tax_tables[year] = empty_table.slice(0)
-      // console.log("Parsing year " + year)
+      tax_tables[year] = $.extend(true, [], empty_table)
+      console.log("Parsing year " + year)
       // Crazy selector because the first two tables (which are obsolete) are
       // not inside .divMiolo, and not specifying it makes nth-of-type return
       // multiple results.
       table_selector = '.divMiolo>table:nth-of-type('+y+') [lang="PT-BR"]'
-      // console.log("selector: "+ table_selector)
+      console.log("selector: "+ table_selector)
       $(table_selector, dom).each(function(i, value) {
         // The table format is a bit crazy, using brazilian format, explicit
         // ranges when only open side woud suffice, and dash to represent zero.
@@ -83,12 +83,12 @@ var downloadTaxTable = function() {
         row = row.replace(/^-$/g, '0')
         var val = parseFloat(row)
         val = val.toString()
-        // console.log("Got val: "  + val)
         if (!(i < 3)) {  // headers
           var tbl_row = Math.floor(i / 3) - 1
           var tbl_col = Math.floor(i % 3)
           if (tbl_col == 0 && tbl_row == 4) val = val.toString() + "+"
           tax_tables[year][tbl_row][tbl_col] = val
+          console.log("Got val: "  + val + "@" + year + ":[" + tbl_row + "][" + tbl_col +"]")
         }
       })
     }

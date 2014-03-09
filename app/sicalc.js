@@ -1,6 +1,5 @@
-var padDate = function(day_or_month) {
-  str = day_or_month.toString()
-  return "00".substring(0, 2 - str.length) + str
+var padLeft = function(number, length) {
+  return (Array(length).join("0") + number).slice(length * -1)
 }
 var updateSicalcView = function(sicalc, url) {
   var month_date = new Date($('#darf_month_ui').select2('data').id)
@@ -11,17 +10,18 @@ var updateSicalcView = function(sicalc, url) {
   var formatted_month = $.datepicker.formatDate('mm/yy', month_date)
   var tax_blr = parseFloat($('#darf_tax_value').text())
   tax_blr = accounting.formatNumber(tax_blr, 2, ".", ","); 
-  cpf = $('#cpf').val()
-  cpf_dv = $('#cpf_dv').val()
+  cpf = padLeft($('#cpf').val(), 9)
+  cpf_dv = padLeft($('#cpf_dv').val(), 2)
 
   jstmpl = "\ne = document.querySelector('{el}'); if (e != null) { e.value = '{value}' }"
   formdata = [ ['select[name=UF]', 'MG11'],
+               ['select[name=municipio]', '4123'],
                ['input[name=CodReceita]', '190'],
                ['input[name=PA]', formatted_month],
                ['input[name=PADesFormatada]', month],
                ['input[name=TxtValRec]', tax_blr],
-               ['input[name=DiaDatVencTex]', padDate(expire_date.getDate())],
-               ['input[name=MesDatVencTex]', padDate(expire_date.getMonth() + 1)],
+               ['input[name=DiaDatVencTex]', padLeft(expire_date.getDate(), 2)],
+               ['input[name=MesDatVencTex]', padLeft(expire_date.getMonth() + 1), 2],
                ['input[name=AnoDatVencTex]', expire_date.getFullYear()],
                ['input[name=Num_Princ]', cpf],
                ['input[name=Num_DV]', cpf_dv] ]
