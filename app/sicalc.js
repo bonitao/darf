@@ -16,7 +16,7 @@ var updateSicalcView = function(sicalc, url) {
   jstmpl = "\ne = document.querySelector('{el}'); if (e != null) { e.value = '{value}' }"
   formdata = [ ['select[name=UF]', 'MG11'],
                ['select[name=municipio]', '4123'],
-               ['input[name=CodReceita]', '190'],
+               ['input[name=CodReceita]', '0190'],
                ['input[name=PA]', formatted_month],
                ['input[name=PADesFormatada]', month],
                ['input[name=TxtValRec]', tax_blr],
