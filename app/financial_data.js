@@ -1,17 +1,19 @@
-/** Helper function for getGoog
+/** Helper function for getShareValue
  * @param {Date} date The date.
  * returns {string} Date string formatted for input in google finance url.
  */
-var getGoogFormatDate = function(mydate) {
+var getShareFormatDate = function(mydate) {
   options = { monthNamesShort: $.datepicker.regional[""].monthNamesShort }
   return $.datepicker.formatDate('M+d,+yy', mydate, options)
 }
+
 /**
- * Retrieves the USD value of one GOOG share at a date.
+ * Retrieves the USD value of one share of the given symbol at a date.
  * @param {Date} date The date.
- * returns {Deferred} Promise holding the rounded %.2f value of a GOOG share
+ * returns {Deferred} Promise holding the rounded %.2f value of a share
  */
-var getGoog = function(date) {
+
+var getShareValue = function(date, symbol) {
   // The CSV end-point is cors unfriendly, but we are packaged app mano.
   end_date = new Date(date.getTime())
   end_date.setDate(end_date.getDate()+1)
@@ -20,17 +22,18 @@ var getGoog = function(date) {
   // holiday. Increase range by 10 days to guarantee a workday in the range.
   start_date = new Date(end_date.getTime())  // clone
   start_date = new Date(start_date.setDate(start_date.getDate() - 10))  // subtract
-  goog_tmpl = "http://www.google.com/finance/historical?cid=694653&startdate={startdate}&enddate={enddate}&num=30&output=csv",
-  goog_url = goog_tmpl.replace(
-      new RegExp('{enddate}', 'g'), getGoogFormatDate(end_date)).replace(
-      new RegExp('{startdate}', 'g'), getGoogFormatDate(start_date))
-  console.log('Fetching ' + goog_url)
-  jqxhr = $.get(goog_url)
+  tmpl = "http://www.google.com/finance/historical?q=NASDAQ%3A" +
+         symbol + "&startdate={startdate}&enddate={enddate}&num=30&output=csv"
+  url = tmpl.replace(
+      new RegExp('{enddate}', 'g'), getShareFormatDate(end_date)).replace(
+      new RegExp('{startdate}', 'g'), getShareFormatDate(start_date))
+  console.log('Fetching ' + url)
+  jqxhr = $.get(url)
   jqxhr.fail(function () {
-    console.log('Failed to fetch GOOG')
+    console.log('Failed to fetch ' + symbol)
   })
   jqxhr.always(function() {
-    console.log('Completed GOOG fetch operation')
+    console.log('Completed ' + symbol + ' fetch operation')
   })
   return jqxhr.then(function(csv) {
     close = csv.split("\n")[1].split(",")[4]
@@ -42,7 +45,7 @@ var getGoog = function(date) {
   })
 }
 var updateGoog = function(date, target) {
-  return getGoog(date).done(function(value) {
+  return getShareValue(date, 'GOOG').done(function(value) {
     $(target).text(value.toFixed(2))
   })
 }
