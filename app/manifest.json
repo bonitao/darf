@@ -8,7 +8,7 @@
       "scripts": [ 
         "app.js", "background.js", "darf.js",
         "financial_data.js", "taxes.js", "utils.js",
-        "libs/jquery.min.js", "libs/jquery.min.map", 
+        "libs/require.min.js", "libs/jquery.min.js", "libs/jquery.min.map",
         "libs/jquery-ui.js", "libs/jquery-ui-i18n.js", "libs/jquery-ui.css",
         "libs/jquery.csv.js",
         "libs/jquery.dataTables.js",

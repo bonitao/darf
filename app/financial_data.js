@@ -14,6 +14,15 @@ var getShareFormatDate = function(mydate) {
  */
 
 var getShareValue = function(date, symbol) {
+  if (typeof(date) != typeof(new Date())) {
+    try {
+      date = $.datepicker.parseDate($.datepicker.ATOM, date)
+    } catch (err) {
+      console.log('Failed to parse date:', err)
+    }
+  }
+  symbol = symbol.toUpperCase()
+  console.log('Running get share for symbol', symbol, 'at date', date)
   // The CSV end-point is cors unfriendly, but we are packaged app mano.
   end_date = new Date(date.getTime())
   end_date.setDate(end_date.getDate()+1)
@@ -55,7 +64,15 @@ var updateGoog = function(date, target) {
  * @param {Date} date The date.
  * returns {Deferred} Promise holding the rounded %.2f BLR value of 1 USD.
  */
-var getExchangeRate = function(date) {
+var getExchangeRate = function(date, currency) {
+  if (typeof(date) != typeof(new Date())) {
+    try {
+      date = $.datepicker.parseDate($.datepicker.ATOM, date)
+    } catch (err) {
+      console.log('Failed to parse date:', err)
+    }
+  }
+  currency = currency.toUpperCase()
   openexchangerates_tmpl = 'http://openexchangerates.org/api/historical/{date}.json?app_id=e9566249a33641ebb9c010a5dbd18a2f'
   openexchangerates_url = openexchangerates_tmpl.replace('{date}', $.datepicker.formatDate($.datepicker.ATOM, date))
   console.log('openexchangerates url: ' + openexchangerates_url)
@@ -66,7 +83,7 @@ var getExchangeRate = function(date) {
   })
   jqxhr.always(function() { console.log('openexchangerates fetched completed') })
   return jqxhr.then(function(json) {
-    var val = parseFloat(json.rates['BRL'])
+    var val = parseFloat(json.rates[currency])
     if (isNaN(val)) {
       console.log("Failed to parse exchange rate value from " + json)
     }
@@ -74,7 +91,7 @@ var getExchangeRate = function(date) {
   })
 }
 var updateExchangeRate = function(date, target) {
-  return getExchangeRate(date).done(function(value) {
+  return getExchangeRate(date, 'BLR').done(function(value) {
     $(target).text(value.toFixed(2))
   })
 }
