@@ -12,8 +12,10 @@
    <script src="libs/jquery.dataTables.js"></script>
    <script src="libs/jquery.mockjax.js"></script>
    <script src="utils.js"></script>
+   <script src="financial_data.js"></script>
    <script src="taxes.js"></script>
    <script>
+/*
      asyncTest("calculateTaxableIncome", function() {
        var vestingdate = new Date("January 2, 2014");
        var sharecount = 5;
@@ -45,13 +47,14 @@
        })
      })
      asyncTest("updateMonthlyTax", function() {
-       $('#qunit-fixture').append('<input id="taxable_blr" value="2500"/>')
+       $('#qunit-fixture').append('<input id="taxable_brl" value="2500"/>')
        $.each(["a", "b", "c", "d"], function(i, v) {
          $('#qunit-fixture').append('<div id="monthly_' + v + '">')
        })
        $('#qunit-fixture').append('<div id="taxable_month">')
        $.datepicker.setDefaults($.datepicker.regional['pt-BR'])
        $('#taxable_month').datepicker()
+       $('#taxable_month').datepicker('setDate', new Date(2014, 01, 01))
        tax_table_url = 'http://www.receita.fazenda.gov.br/aliquotas/ContribFont2012a2015.htm'
        html = $('#receita_tax_tables_html').contents().text()
        $.mockjax({ url: tax_table_url, responseText: html })
@@ -64,6 +67,27 @@
          start()  // return control to qunit
        })
      })
+     asyncTest("calculateMonthlyTaxOnce", function() {
+       tax_table_url = 'http://www.receita.fazenda.gov.br/aliquotas/ContribFont2012a2015.htm'
+       html = $('#receita_tax_tables_html').contents().text()
+       $.mockjax({ url: tax_table_url, responseText: html })
+
+       var vestingdate = new Date("January 2, 2014");
+       var sharecount = 5;
+       goog_promise = $.Deferred()
+       window.getGoog = function(d) { return goog_promise };
+       exchange_rate_promise = $.Deferred()
+       window.getExchangeRate = function(d) { return exchange_rate_promise };
+       p = calculateMonthlyTaxOnceFromGoog(sharecount, vestingdate)
+       goog_promise.resolve(500)
+       exchange_rate_promise.resolve(2.4)
+       p.then(function(monthly_tax_calculation) {
+         var tax = monthly_tax_calculation.tax_brl.toFixed(2)
+         deepEqual(tax, (823.85).toFixed(2))
+         start()  // return control to qunit
+       })
+     })
+*/
    </script>
 </head>
 <body>

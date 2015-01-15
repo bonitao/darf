@@ -25,3 +25,15 @@ var parseHTML = function(html) {
   dom.documentElement.innerHTML = html;
   return dom;
 }
+
+var readDate = function(date) {
+  if (typeof(date) == typeof(new Date())) return date
+  try {
+    date = $.datepicker.parseDate($.datepicker.ATOM, date)
+  } catch (err) {
+    console.log('Failed to parse date:', err)
+    return null
+  }
+  return date
+}
+

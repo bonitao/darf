@@ -3,6 +3,7 @@
  * @returns {Date} The date for conversion from USD to BRL.
  */
 var currencyConversionDate = function(vestingdate) {
+  vestingdate = readDate(vestingdate)
   var currencydate = new Date(vestingdate.getTime())
   // The USD value used is the last weekday of the first 15 days of the previous month.
   currencydate.setMonth(currencydate.getMonth() - 1)
@@ -11,31 +12,30 @@ var currencyConversionDate = function(vestingdate) {
   return currencydate
 }
 /**
- * Calculates taxable income assuming sharecount shares received at vestingdate.
- * @param {int} sharecount
+ * Calculates taxable income assuming share_count shares received at vestingdate.
+ * @param {int} share_count
  * @param {Date} vestingdate
  * returns {Deferred} Promise of [taxable, goog, exchangerate] holding the
  * rounded %.2f value in BRL of tax to be paid and the values returned by
  * getGoog and getExchangeRate respectively.
  */
-var calculateTaxableIncome = function(sharecount, vestingdate) {
+var calculateTaxableIncome = function(share_count, vestingdate) {
   var currencydate = currencyConversionDate(vestingdate)
   rpc1 = getGoog(vestingdate)
-  rpc2 = getExchangeRate(currencydate)
+  rpc2 = getExchangeRate(currencydate, 'BRL')
   return $.when(rpc1, rpc2).then(function(goog, exchange_rate) {
-   console.log("goog: " + goog)
-    taxable = sharecount * goog * exchange_rate
+    taxable = share_count * goog * exchange_rate
     return { taxable: taxable, goog: goog, exchange_rate: exchange_rate }
   })
 }
 var updateTaxableIncome = function() {
-  var sharecount = $('#sharecount').val();
+  var share_count = $('#sharecount').val();
   var vestingdate = $('#vestingdate').datepicker('getDate');
-  var promise = calculateTaxableIncome(sharecount, vestingdate)
+  var promise = calculateTaxableIncome(share_count, vestingdate)
   return promise.then(function(taxable_income_calculation) {
     $('#currencydate').datepicker('setDate', currencyConversionDate(vestingdate))
     $('#taxable').text(taxable_income_calculation.taxable.toFixed(2))
-    $('#taxable_a').text(sharecount)
+    $('#taxable_a').text(share_count)
     $('#taxable_b').text(taxable_income_calculation.goog.toFixed(2))
     $('#taxable_c').text(taxable_income_calculation.exchange_rate.toFixed(2))
   })
@@ -53,7 +53,7 @@ var downloadTaxTable = function() {
     console.log('Failed to fetch tax table')
   })
   jqxhr.always(function() {
-    console.log('Completed tax table fetch operation')
+    // console.log('Completed tax table fetch operation')
   })
   return jqxhr.then(function(data) {
     var dom = parseHTML(data)
@@ -63,12 +63,12 @@ var downloadTaxTable = function() {
     for (var y = 1; y < 4; y++) {
       var year = 2011 + y
       tax_tables[year] = $.extend(true, [], empty_table)
-      console.log("Parsing year " + year)
+      // console.log("Parsing year " + year)
       // Crazy selector because the first two tables (which are obsolete) are
       // not inside .divMiolo, and not specifying it makes nth-of-type return
       // multiple results.
       table_selector = '.divMiolo>table:nth-of-type('+y+') [lang="PT-BR"]'
-      console.log("selector: "+ table_selector)
+      // console.log("selector: "+ table_selector)
       $(table_selector, dom).each(function(i, value) {
         // The table format is a bit crazy, using brazilian format, explicit
         // ranges when only open side woud suffice, and dash to represent zero.
@@ -88,7 +88,7 @@ var downloadTaxTable = function() {
           var tbl_col = Math.floor(i % 3)
           if (tbl_col == 0 && tbl_row == 4) val = val.toString() + "+"
           tax_tables[year][tbl_row][tbl_col] = val
-          console.log("Got val: "  + val + "@" + year + ":[" + tbl_row + "][" + tbl_col +"]")
+          // console.log("Got val: "  + val + "@" + year + ":[" + tbl_row + "][" + tbl_col +"]")
         }
       })
     }
@@ -115,27 +115,57 @@ var updateTaxTables = function() {
   updateTaxTable(2014);
 }
 
-var calculateMonthlyTax = function(taxable_blr, tax_date, tax_tables) {
+var calculateMonthlyTax = function(taxable_brl, tax_date, tax_tables) {
   var year = tax_date.getFullYear()
   var range = 0, rate = 0, deduction = 0
   for (row_id in tax_tables[year]) {
     range = parseFloat(tax_tables[year][row_id][0])
     rate = parseFloat(tax_tables[year][row_id][1])
     deduction = parseFloat(tax_tables[year][row_id][2])
-    if (range > taxable_blr) break;
+    if (range > taxable_brl) break;
   }
-  tax_blr = taxable_blr * (rate / 100) - deduction
-  return { tax_blr: tax_blr, rate: rate, deduction: deduction }
+  tax_brl = taxable_brl * (rate / 100) - deduction
+  console.log("Computed tax:", tax_brl)
+  return { tax_brl: tax_brl, rate: rate, deduction: deduction }
 }
 
 var updateMonthlyTax = function() {
   var tax_date = $('#taxable_month').datepicker('getDate')
-  var taxable_blr = parseFloat($('#taxable_blr').val())
+  var taxable_brl = parseFloat($('#taxable_brl').val())
   return downloadTaxTable().then(function(tax_tables) {
-    var tax_computation = calculateMonthlyTax(taxable_blr, tax_date, tax_tables)
-    $('#monthly_a').text(taxable_blr)
+    var tax_computation = calculateMonthlyTax(taxable_brl, tax_date, tax_tables)
+    $('#monthly_a').text(taxable_brl)
     $('#monthly_b').text(tax_computation.rate.toFixed(2))
     $('#monthly_c').text(tax_computation.deduction.toFixed(2))
-    $('#monthly_d').text(tax_computation.tax_blr.toFixed(2))
+    $('#monthly_d').text(tax_computation.tax_brl.toFixed(2))
+  })
+}
+
+var calculateMonthlyTaxOnceFromBRL = function(taxable_brl, tax_date) {
+  tax_date = readDate(tax_date)
+  return downloadTaxTable().then(function(tax_tables) {
+    return calculateMonthlyTax(taxable_brl, tax_date, tax_tables)
+  })
+}
+
+var calculateMonthlyTaxOnceFromUSD = function(taxable_usd, tax_date) {
+  console.log('Taxable usd:', taxable_usd)
+  tax_date = readDate(tax_date)
+  var currencydate = currencyConversionDate(tax_date)
+  console.log('Currency Date:', currencydate)
+  return getExchangeRate(currencydate, 'BRL').then(function(exchange_rate) {
+    taxable_brl = taxable_usd * exchange_rate
+    console.log('Taxable brl computed:', taxable_brl)
+    return calculateMonthlyTaxOnceFromBRL(taxable_brl, tax_date)
+  })
+}
+    
+var calculateMonthlyTaxOnceFromShare = function(share_count, symbol, vestingdate) {
+  vestingdate = readDate(vestingdate)
+  console.log('Share count:', share_count)
+  return getShareValue(vestingdate, symbol).then(function(share_value) {
+    var taxable_usd = share_count * share_value
+    console.log('Taxable usd computed:', taxable_usd)
+    return calculateMonthlyTaxOnceFromUSD(taxable_usd, vestingdate)
   })
 }

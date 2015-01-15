@@ -14,13 +14,7 @@ var getShareFormatDate = function(mydate) {
  */
 
 var getShareValue = function(date, symbol) {
-  if (typeof(date) != typeof(new Date())) {
-    try {
-      date = $.datepicker.parseDate($.datepicker.ATOM, date)
-    } catch (err) {
-      console.log('Failed to parse date:', err)
-    }
-  }
+  date = readDate(date)
   symbol = symbol.toUpperCase()
   console.log('Running get share for symbol', symbol, 'at date', date)
   // The CSV end-point is cors unfriendly, but we are packaged app mano.
@@ -62,16 +56,11 @@ var updateGoog = function(date, target) {
 /**
  * Retrieves the value of a USD in BRL for the given date.
  * @param {Date} date The date.
- * returns {Deferred} Promise holding the rounded %.2f BLR value of 1 USD.
+ * returns {Deferred} Promise holding the rounded %.2f BRL value of 1 USD.
  */
 var getExchangeRate = function(date, currency) {
-  if (typeof(date) != typeof(new Date())) {
-    try {
-      date = $.datepicker.parseDate($.datepicker.ATOM, date)
-    } catch (err) {
-      console.log('Failed to parse date:', err)
-    }
-  }
+  console.log('Getting rate for', currency, 'at', date)
+  date = readDate(date)
   currency = currency.toUpperCase()
   openexchangerates_tmpl = 'http://openexchangerates.org/api/historical/{date}.json?app_id=e9566249a33641ebb9c010a5dbd18a2f'
   openexchangerates_url = openexchangerates_tmpl.replace('{date}', $.datepicker.formatDate($.datepicker.ATOM, date))
@@ -85,13 +74,13 @@ var getExchangeRate = function(date, currency) {
   return jqxhr.then(function(json) {
     var val = parseFloat(json.rates[currency])
     if (isNaN(val)) {
-      console.log("Failed to parse exchange rate value from " + json)
+      console.log("Failed to parse exchange rate for", currency, "value from ", json.rates[currency])
     }
     return val
   })
 }
 var updateExchangeRate = function(date, target) {
-  return getExchangeRate(date, 'BLR').done(function(value) {
+  return getExchangeRate(date, 'BRL').done(function(value) {
     $(target).text(value.toFixed(2))
   })
 }
