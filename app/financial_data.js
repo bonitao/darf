@@ -84,3 +84,21 @@ var updateExchangeRate = function(date, target) {
     $(target).text(value.toFixed(2))
   })
 }
+
+/** Calculates the date for currency conversion to be used for tax purposes.
+ * @param {Date} vestingdate When the shares were granted.
+ * @returns {Date} The date for conversion from USD to BRL.
+ *
+ * This could live in tax.js, but it is useful to when all you want is to get
+ * financial data to do the tax calculation yourself, so we keep it here.
+ */
+var getExchangeRateTaxDate = function(release_date) {
+  release_date = readDate(release_date)
+  var currency_date = new Date(release_date.getTime())
+  // The USD value used is the last weekday of the first 15 days of the previous month.
+  currency_date.setMonth(currency_date.getMonth() - 1)
+  currency_date.setDate(16)
+  currency_date = previousWeekday(currency_date)
+  return currency_date
+}
+

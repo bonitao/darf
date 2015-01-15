@@ -15,7 +15,6 @@
    <script src="financial_data.js"></script>
    <script src="taxes.js"></script>
    <script>
-/*
      asyncTest("calculateTaxableIncome", function() {
        var vestingdate = new Date("January 2, 2014");
        var sharecount = 5;
@@ -75,10 +74,10 @@
        var vestingdate = new Date("January 2, 2014");
        var sharecount = 5;
        goog_promise = $.Deferred()
-       window.getGoog = function(d) { return goog_promise };
+       window.getShareValue = function(d, s) { return goog_promise };
        exchange_rate_promise = $.Deferred()
        window.getExchangeRate = function(d) { return exchange_rate_promise };
-       p = calculateMonthlyTaxOnceFromGoog(sharecount, vestingdate)
+       p = calculateMonthlyTaxOnceFromShare(sharecount, 'GOOG', vestingdate)
        goog_promise.resolve(500)
        exchange_rate_promise.resolve(2.4)
        p.then(function(monthly_tax_calculation) {
@@ -87,7 +86,6 @@
          start()  // return control to qunit
        })
      })
-*/
    </script>
 </head>
 <body>

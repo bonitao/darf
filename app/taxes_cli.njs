@@ -14,7 +14,7 @@ cli.main(function(args, options) {
   var phantom_cli = require('./phantom_cli_helper');
   phantom_cli.phantomCli('./taxes_test.html', this.debug,
     function(date, googl, goog, usd, brl) {
-      currencydate = currencyConversionDate(date)
+      currency_date = getExchangeRateTaxDate(date)
       var rpc = null
       if (brl) { rpc = calculateMonthlyTaxOnceFromBRL(brl, date) }
       if (usd) { rpc = calculateMonthlyTaxOnceFromUSD(usd, date) }

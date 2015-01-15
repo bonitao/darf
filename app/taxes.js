@@ -1,16 +1,3 @@
-/** Calculates the date for currency conversion to be used for tax purposes.
- * @param {Date} vestingdate When the shares were granted.
- * @returns {Date} The date for conversion from USD to BRL.
- */
-var currencyConversionDate = function(vestingdate) {
-  vestingdate = readDate(vestingdate)
-  var currencydate = new Date(vestingdate.getTime())
-  // The USD value used is the last weekday of the first 15 days of the previous month.
-  currencydate.setMonth(currencydate.getMonth() - 1)
-  currencydate.setDate(16)
-  currencydate = previousWeekday(currencydate)
-  return currencydate
-}
 /**
  * Calculates taxable income assuming share_count shares received at vestingdate.
  * @param {int} share_count
@@ -20,9 +7,9 @@ var currencyConversionDate = function(vestingdate) {
  * getGoog and getExchangeRate respectively.
  */
 var calculateTaxableIncome = function(share_count, vestingdate) {
-  var currencydate = currencyConversionDate(vestingdate)
+  var currency_date = getExchangeRateTaxDate(vestingdate)
   rpc1 = getGoog(vestingdate)
-  rpc2 = getExchangeRate(currencydate, 'BRL')
+  rpc2 = getExchangeRate(currency_date, 'BRL')
   return $.when(rpc1, rpc2).then(function(goog, exchange_rate) {
     taxable = share_count * goog * exchange_rate
     return { taxable: taxable, goog: goog, exchange_rate: exchange_rate }
@@ -33,7 +20,7 @@ var updateTaxableIncome = function() {
   var vestingdate = $('#vestingdate').datepicker('getDate');
   var promise = calculateTaxableIncome(share_count, vestingdate)
   return promise.then(function(taxable_income_calculation) {
-    $('#currencydate').datepicker('setDate', currencyConversionDate(vestingdate))
+    $('#currencydate').datepicker('setDate', getExchangeRateTaxDate(vestingdate))
     $('#taxable').text(taxable_income_calculation.taxable.toFixed(2))
     $('#taxable_a').text(share_count)
     $('#taxable_b').text(taxable_income_calculation.goog.toFixed(2))
@@ -125,7 +112,7 @@ var calculateMonthlyTax = function(taxable_brl, tax_date, tax_tables) {
     if (range > taxable_brl) break;
   }
   tax_brl = taxable_brl * (rate / 100) - deduction
-  console.log("Computed tax:", tax_brl)
+  // console.log("Computed tax:", tax_brl)
   return { tax_brl: tax_brl, rate: rate, deduction: deduction }
 }
 
@@ -149,23 +136,23 @@ var calculateMonthlyTaxOnceFromBRL = function(taxable_brl, tax_date) {
 }
 
 var calculateMonthlyTaxOnceFromUSD = function(taxable_usd, tax_date) {
-  console.log('Taxable usd:', taxable_usd)
+  // console.log('Taxable usd:', taxable_usd)
   tax_date = readDate(tax_date)
-  var currencydate = currencyConversionDate(tax_date)
-  console.log('Currency Date:', currencydate)
-  return getExchangeRate(currencydate, 'BRL').then(function(exchange_rate) {
+  var currency_date = getExchangeRateTaxDate(tax_date)
+  // console.log('Currency Date:', currency_date)
+  return getExchangeRate(currency_date, 'BRL').then(function(exchange_rate) {
     taxable_brl = taxable_usd * exchange_rate
-    console.log('Taxable brl computed:', taxable_brl)
+    // console.log('Taxable brl computed:', taxable_brl)
     return calculateMonthlyTaxOnceFromBRL(taxable_brl, tax_date)
   })
 }
     
 var calculateMonthlyTaxOnceFromShare = function(share_count, symbol, vestingdate) {
   vestingdate = readDate(vestingdate)
-  console.log('Share count:', share_count)
+  // console.log('Share count:', share_count)
   return getShareValue(vestingdate, symbol).then(function(share_value) {
     var taxable_usd = share_count * share_value
-    console.log('Taxable usd computed:', taxable_usd)
+    // console.log('Taxable usd computed:', taxable_usd)
     return calculateMonthlyTaxOnceFromUSD(taxable_usd, vestingdate)
   })
 }

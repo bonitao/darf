@@ -19,6 +19,9 @@ var parseBenefitAccessCsv = function(csv) {
   return per_month_data
 }
 
+var parseBenefitAccessXls = function(xls_content) {
+}
+
 /** Augments fields of per_month_data to have Price and Net Proceeds fields
  * which are originally zeroed.
  */
