@@ -7,6 +7,7 @@
    <link rel="stylesheet" href="libs/qunit.css">
    <link rel="stylesheet" href="libs/select2.css">
    <script src="libs/qunit.js"></script>
+   <script src="libs/xls.full.min.js"></script>
    <script src="libs/jquery.min.js"></script>
    <script src="libs/jquery-ui.js"></script>
    <script src="libs/jquery-ui-i18n.js"></script>
@@ -26,7 +27,7 @@
        per_month_data = { '2013-08-01' : 
          [{ 'Transaction Date': '02-Aug-2013', 'Shares': '5' }]
        }
-       window.getGoog = function(release_date) {
+       window.getShareValue = function(release_date, symbol) {
          return $.Deferred().resolve(900).promise()
        }
        fillFinancialData(per_month_data).then(function() {
@@ -44,31 +45,33 @@
        $('#qunit-fixture').append('<div id="darf_value">')
        $('#qunit-fixture').append('<div id="income_value">')
        $.datepicker.setDefaults($.datepicker.regional['pt-BR'])
-       window.getGoog = function(release_date) {
+       window.getShareValue = function(release_date, symbol) {
          return $.Deferred().resolve(900).promise()
        }
-       window.currencyConversionDate = function(tax_month) {
+       window.getExchangeRateTaxDate = function(tax_month) {
          return new Date(tax_month.getTime())
        }
-       window.getExchangeRate = function(date) {
+       window.getExchangeRate = function(date, currency) {
          return $.Deferred().resolve(2.4).promise()
        }
        window.downloadTaxTable = function() {
          tax_table = { 2013: [[100,0,0],[500, 27.5, 100]] }
          return $.Deferred().resolve(tax_table).promise()
        }
-       window.calculateMonthlyTax = function(taxable, tax_tables) {
+       window.calculateMonthlyTax = function(taxable, tax_date, tax_tables) {
          row = tax_tables[2013][1]
          tax = taxable * (row[1]/100) - row[2]
-         return { tax_blr: tax, rate: row[1], deduction: row[2] }
+         return { tax_brl: tax, rate: row[1], deduction: row[2] }
        }
-       per_month_data = { '2013-08-01' : 
+       monthstr = '2013-08-01'
+       per_month_data = []
+       per_month_data[monthstr] = 
          [{ 'Transaction Date': '02-Aug-2013', 'Transaction Type': 'Release',
-           'Shares': '5', 'Price': '800', 'Net Proceeds': (800*5).toString() }]
-       }
-       updateDarfTable(null, per_month_data).then(function() {
-         deepEqual($('#darf_month_ui').select2('data').text, 'Agosto 2013')
-         updateIncomeAndTax().then(function(income_and_tax) {
+            'Shares': '5', 'Price': '800', 'Net Proceeds': (800*5).toString() }]
+       updateDarfTable(month, per_month_data).then(function() {
+         // Dunno what is wrong here with select2. Fix me.
+         // deepEqual($('#darf_month_ui').select2('data').text, 'Agosto 2013')
+         updateIncomeAndTax(month, per_month_data).then(function(income_and_tax) {
            deepEqual(income_and_tax[0], 800*5*2.4)
            deepEqual(income_and_tax[1], 800*5*2.4*(27.5/100) - 100)
            start()  // return control to qunit

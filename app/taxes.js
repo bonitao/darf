@@ -4,11 +4,11 @@
  * @param {Date} vestingdate
  * returns {Deferred} Promise of [taxable, goog, exchangerate] holding the
  * rounded %.2f value in BRL of tax to be paid and the values returned by
- * getGoog and getExchangeRate respectively.
+ * getShareValue and getExchangeRate respectively.
  */
 var calculateTaxableIncome = function(share_count, vestingdate) {
   var currency_date = getExchangeRateTaxDate(vestingdate)
-  rpc1 = getGoog(vestingdate)
+  rpc1 = getShareValue(vestingdate, 'GOOG')
   rpc2 = getExchangeRate(currency_date, 'BRL')
   return $.when(rpc1, rpc2).then(function(goog, exchange_rate) {
     taxable = share_count * goog * exchange_rate

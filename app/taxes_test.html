@@ -19,7 +19,7 @@
        var vestingdate = new Date("January 2, 2014");
        var sharecount = 5;
        goog_promise = $.Deferred()
-       window.getGoog = function(d) { return goog_promise };
+       window.getShareValue = function(d, s) { return goog_promise };
        exchange_rate_promise = $.Deferred()
        window.getExchangeRate = function(d) { return exchange_rate_promise };
        p = calculateTaxableIncome(sharecount, vestingdate)

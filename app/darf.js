@@ -2,9 +2,9 @@
  * csv and only lines representing a share release are kept. The month key is a
  * string formatted with datepicker.ATOM and day component fixed to 1.
  */
-var parseBenefitAccessCsv = function(csv) {
+var parseBenefitAccessCsv = function(csv_content) {
   // Remove leading lines with different schema, but keep headers.
-  csv = csv.split('\n').slice(4).join('\n')
+  csv = csv_content.split('\n').slice(4).join('\n')
   var data = $.csv.toObjects(csv)
   per_month_data = {}
   data = data.filter(function(e) { return e['Transaction Type'] == 'Release' })
@@ -19,7 +19,19 @@ var parseBenefitAccessCsv = function(csv) {
   return per_month_data
 }
 
-var parseBenefitAccessXls = function(xls_content) {
+var parseBenefitAccessXlsFromFile = function(xls_file) {
+  var file = new File(options.xls)
+  var reader = new FileReader()
+  reader.onload = function(e) {
+    xls_content = e.target.result
+    return parseBenefitAccessXls(xls_content)
+  }
+  reader.readAsBinaryString(xls_content)
+}
+
+var parseBenefitAccessXls = function(binary_xls_content) {
+  console.log('reading workbook')
+  workbook = XLS.read(binary_xls_content, { type: 'binary' })
 }
 
 /** Augments fields of per_month_data to have Price and Net Proceeds fields
@@ -32,7 +44,7 @@ var fillFinancialData = function(per_month_data) {
       row = per_month_data[month][i]
       row_date = $.datepicker.parseDate(
            'dd-M-yy', row['Transaction Date'], $.datepicker.regional[''])
-      goog_rpcs.push(getGoog(row_date))
+      goog_rpcs.push(getShareValue(row_date, 'GOOG'))
     }
   }
   return $.when.apply($, goog_rpcs).then(function() {
@@ -63,9 +75,9 @@ var updateDarfTable = function(month, per_month_data) {
      $('#txh_table').dataTable().fnAddData([
        row['Transaction Date'],
        row['Transaction Type'],
-       row['Price'].toFixed(2),
+       parseFloat(row['Price']).toFixed(2),
        row['Shares'],
-       row['Net Proceeds'].toFixed(2)
+       parseFloat(row['Net Proceeds']).toFixed(2)
      ])
   }
   return $.Deferred().resolve().promise()
@@ -96,28 +108,28 @@ var updateIncomeAndTax = function(month, per_month_data) {
   }
   var month_date = $.datepicker.parseDate($.datepicker.ATOM, month)
   darf_exchange_rate_promise = getExchangeRate(
-      currencyConversionDate(month_date))
-  darf_taxable_blr_promise = $.when(darf_exchange_rate_promise).then(
+      getExchangeRateTaxDate(month_date))
+  darf_taxable_brl_promise = $.when(darf_exchange_rate_promise).then(
           function(exchange_rate) {
     $('#darf_usd_income').text(income_value_usd.toFixed(2))
     $('#darf_exchange_rate').text(exchange_rate.toFixed(2))
-    taxable_blr = income_value_usd * exchange_rate
-    $('#darf_blr_taxable').text(taxable_blr.toFixed(2))
-    $('#income_value').text(taxable_blr.toFixed(2))
+    taxable_brl = income_value_usd * exchange_rate
+    $('#darf_brl_taxable').text(taxable_brl.toFixed(2))
+    $('#income_value').text(taxable_brl.toFixed(2))
     $('#income_value').tooltip({'content': $('#darf_income_calculation').text()})
-    return taxable_blr
+    return taxable_brl
   })
   tax_tables_promise = downloadTaxTable()
-  all_done = $.when(darf_taxable_blr_promise, tax_tables_promise).then(
-       function(taxable_blr, tax_tables) {
-     tax_calculation = calculateMonthlyTax(taxable_blr, month_date, tax_tables)
-     $('#darf_taxable_blr').text(taxable_blr.toFixed(2))
+  all_done = $.when(darf_taxable_brl_promise, tax_tables_promise).then(
+       function(taxable_brl, tax_tables) {
+     tax_calculation = calculateMonthlyTax(taxable_brl, month_date, tax_tables)
+     $('#darf_taxable_brl').text(taxable_brl.toFixed(2))
      $('#darf_tax_rate').text(tax_calculation.rate.toFixed(2))
      $('#darf_tax_deduction').text(tax_calculation.deduction.toFixed(2))
-     $('#darf_tax_value').text(tax_calculation.tax_blr.toFixed(2))
-     $('#darf_value').text(tax_calculation.tax_blr.toFixed(2))
+     $('#darf_tax_value').text(tax_calculation.tax_brl.toFixed(2))
+     $('#darf_value').text(tax_calculation.tax_brl.toFixed(2))
      $('#darf_value').tooltip({'content': $('#darf_tax_calculation').text()})
-     return [taxable_blr, tax_calculation.tax_blr]
+     return [taxable_brl, tax_calculation.tax_brl]
   })
   return all_done
 }
