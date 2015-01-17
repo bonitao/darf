@@ -7,11 +7,22 @@ cli.parse({
     googl:  ['l', 'The number of GOOGL shares released at the given date', 'number', 0],
     goog:  ['g', 'The number of GOOG shares released at the given date', 'number', 0],
     usd:   ['u', 'The number of dollars received at the given date', 'number', 0],
-    brl:  ['g', 'The number of brazilian reais received at the given date', 'number', 0]
+    brl:  ['g', 'The number of brazilian reais received at the given date', 'number', 0],
+    taxtable:  ['x', 'Download the 2014/2015 tax table and print it in json', 'bool', false]
 });
 
 cli.main(function(args, options) {
   var phantom_cli = require('./phantom_cli_helper');
+  if (options.taxtable) {
+    // Just download the tax tables and exit
+    phantom_cli.phantomCli('./taxes_test.html', this.debug,
+      function() { return downloadTaxTableJSON() }, [],
+      function(tax_table_json) {
+        console.log(tax_table_json)
+      }
+    )
+    return
+  }
   phantom_cli.phantomCli('./taxes_test.html', this.debug,
     function(date, googl, goog, usd, brl) {
       currency_date = getExchangeRateTaxDate(date)

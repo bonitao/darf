@@ -79,7 +79,21 @@ var downloadTaxTable = function() {
         }
       })
     }
+    // Add 2015 data by hand since we don't have it yet. Copied from
+    // http://g1.globo.com/economia/imposto-de-renda/2014/noticia/2014/05/nova-tabela-do-imposto-de-renda-e-publicada-no-diario-oficial.html
+    tax_tables[2015] = $.extend(true, [], empty_table)
+    tax_tables[2015][0] = ['1868.22', '0', '0' ]
+    tax_tables[2015][1] = ['2799.86', '7.5', '140.12' ]
+    tax_tables[2015][2] = ['3733.19', '15', '350.11' ]
+    tax_tables[2015][3] = ['4664.68', '22.5', '630.10' ]
+    tax_tables[2015][4] = ['4664.68+', '27.5', '863.33' ]
     return tax_tables
+  })
+}
+
+var downloadTaxTableJSON = function() {
+  return downloadTaxTable().then(function(tax_tables) {
+    return JSON.stringify(tax_tables, undefined, 2)
   })
 }
 

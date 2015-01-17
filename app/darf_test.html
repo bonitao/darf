@@ -17,25 +17,12 @@
    <script src="libs/select2.js"></script>
    <script src="darf.js"></script>
    <script>
-     test("parseBenefitAccessCsvTest", function() {
-       csv = $('#benefit_access_csv').contents().text()
+     test("parseBenefitAccessXml2CsvTest", function() {
+       csv = $('#benefit_access_xls2csv').contents().text()
        data = parseBenefitAccessCsv(csv)
-       deepEqual(data['2013-08-01'][0]['Transaction Date'], '01-Aug-2013')
-       deepEqual(parseInt(data['2013-08-01'][0]['Shares']), 3)
+       deepEqual(data['2014-03-01'][0]['Date'], '03/25/2014')
+       deepEqual(parseInt(data['2014-03-01'][0]['Quantity']), 7)
      });
-     asyncTest("fillFinancialData", function() {
-       per_month_data = { '2013-08-01' : 
-         [{ 'Transaction Date': '02-Aug-2013', 'Shares': '5' }]
-       }
-       window.getShareValue = function(release_date, symbol) {
-         return $.Deferred().resolve(900).promise()
-       }
-       fillFinancialData(per_month_data).then(function() {
-         deepEqual(parseFloat(per_month_data['2013-08-01'][0]['Price']), 900)
-         deepEqual(parseFloat(per_month_data['2013-08-01'][0]['Net Proceeds']), 900 * 5)
-         start()  // return control to qunit
-       })
-     })
      asyncTest("updateDarfTable", function() {
        $('#qunit-fixture').append('<table id="txh_table"> <thead><tr><th>Data</th><th>Transação</th><th>Preço (US$)</th><th>Ações</th><th>Valor (US$)</th></tr></thead><tbody><tr><td>0</td><td>1</td><td>2</td><td>3</td>4<td></td></tr></tbody></table>')
        $('#txh_table').dataTable()
@@ -66,12 +53,12 @@
        monthstr = '2013-08-01'
        per_month_data = []
        per_month_data[monthstr] = 
-         [{ 'Transaction Date': '02-Aug-2013', 'Transaction Type': 'Release',
-            'Shares': '5', 'Price': '800', 'Net Proceeds': (800*5).toString() }]
-       updateDarfTable(month, per_month_data).then(function() {
+         [{ 'Date': '08/02/2013', 'Type': 'Release',
+            'Quantity': '5', 'Price': '800' }]
+       updateDarfTable(monthstr, per_month_data).then(function() {
          // Dunno what is wrong here with select2. Fix me.
          // deepEqual($('#darf_month_ui').select2('data').text, 'Agosto 2013')
-         updateIncomeAndTax(month, per_month_data).then(function(income_and_tax) {
+         updateIncomeAndTax(monthstr, per_month_data).then(function(income_and_tax) {
            deepEqual(income_and_tax[0], 800*5*2.4)
            deepEqual(income_and_tax[1], 800*5*2.4*(27.5/100) - 100)
            start()  // return control to qunit
@@ -84,5 +71,6 @@
   <div id="qunit"></div>
   <div id="qunit-fixture"></div>
   <iframe src='testdata/benefit_access_csv.txt' width='0' height='0' style="visibility: hidden" id="benefit_access_csv"></iframe>
+  <iframe src='testdata/benefit_access_xls2csv.txt' width='0' height='0' style="visibility: hidden" id="benefit_access_xls2csv"></iframe>
 </body>
 </html>
