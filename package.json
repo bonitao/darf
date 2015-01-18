@@ -1,0 +1,25 @@
+{
+  "name": "darf",
+  "version": "0.1.2",
+  "description": "Help with taxes",
+  "author": "Davi Reis <davi.reis@gmail.com>",
+  "bin": {
+    "financial_data_cli": "./cli/financial_data_cli.njs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bonitao/darf"
+   },
+  "dependencies": {
+    "xlsjs": "*",
+    "cli": "*",
+    "node-phantom-simple": "*"
+  },
+  "devDependencies": {
+    "node-qunit-phantomjs": "*",
+    "crx": "*"
+  },
+  "private": true,
+  "license": "MIT"
+}
+  

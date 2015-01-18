@@ -15,7 +15,7 @@ cli.main(function(args, options) {
   var phantom_cli = require('./phantom_cli_helper');
   if (options.taxtable) {
     // Just download the tax tables and exit
-    phantom_cli.phantomCli('./taxes_test.html', this.debug,
+    phantom_cli.phantomCli('../app/taxes_test.html', this.debug,
       function() { return downloadTaxTableJSON() }, [],
       function(tax_table_json) {
         console.log(tax_table_json)

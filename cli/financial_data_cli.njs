@@ -10,7 +10,7 @@ cli.parse({
 
 cli.main(function(args, options) {
   var phantom_cli = require('./phantom_cli_helper');
-  phantom_cli.phantomCli('./financial_data_test.html', this.debug,
+  phantom_cli.phantomCli('./app/financial_data_test.html', this.debug,
     function(date, symbol, currency) {
       rpcs = []
       if (symbol) { rpcs.push(getShareValue(date, symbol)) }
