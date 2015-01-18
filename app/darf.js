@@ -96,7 +96,6 @@ var generateMonthlyReport = function(per_month_data, per_month_exchange_rate, ta
       }
       income_value_usd = income_value_usd + price * quantity
     }
-    e
     exchange_rate_key =
         $.datepicker.formatDate($.datepicker.ATOM, getExchangeRateTaxDate(month))
     exchange_rate = per_month_exchange_rate[exchange_rate_key]
@@ -134,16 +133,17 @@ var updateDarfTable = function(month, per_month_data) {
   $('#txh_table').dataTable().fnClearTable()
   for (var i = 0; i < per_month_data[month].length; i++) {
     row = per_month_data[month][i]
-     price = parseFloat(row['Price']).toFixed(2)
-     share_count = parseInt(row['Quantity'])
-     net_cash_proceeds = price * share_count
-     $('#txh_table').dataTable().fnAddData([
-       row['Date'],
-       row['Type'],
-       price,
-       share_count,
-       net_cash_proceeds
-     ])
+    price = parseFloat(row['Price'])
+    share_count = parseInt(row['Quantity'])
+    net_cash_proceeds = price * share_count
+    $('#txh_table').dataTable().fnAddData([
+      row['Date'],
+      row['Plan'],
+      row['Type'],
+      price.toFixed(2),
+      share_count,
+      net_cash_proceeds.toFixed(2)
+    ])
   }
   return $.Deferred().resolve().promise()
 }
@@ -160,7 +160,6 @@ var populateMonthSelect = function(months) {
   });
   $('#darf_month_ui').select2("enable", true)
 }
-
 
 var updateIncomeAndTax = function(month, per_month_data) {
   var data = per_month_data[month]

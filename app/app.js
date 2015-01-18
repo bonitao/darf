@@ -2,11 +2,11 @@
 $(function() {
   $(document).tooltip();  // enable tooltips as title attribute
   $('#tabs').tabs()
-  $("#quotes_accordion").accordion({active: false, collapsible: true, activate: function(event, ui) { 
-      $("#quotes_accordion").accordion("refresh")
-      console.log('accordion refreshed')
-  }});
-
+  $("#quotes_accordion").accordion({active: false, collapsible: true });
+  // Refresh whenever visible panel changes to resize and accomodate webviews
+  $("#quotes_accordion").on('accordionactivate', function(event, ui) {
+    $("#quotes_accordion").accordion('refresh')
+  })
   $.datepicker.setDefaults($.datepicker.regional['pt-BR'])
   $('#vestingdate').datepicker();
   $('#taxable_month').datepicker({
@@ -33,11 +33,6 @@ $(function() {
   $('#darf_button').button()
   $("#darf_button").prop("disabled", false);
   $('#darf_button').click(function() {
-    // if ($('#cpf').val().length == 0 || $('#cpf_dv').val().length == 0) {
-      // $("<p>Please fill your CPF on the top right of the application.</p>").dialog({modal:true, buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); } } ] });
-      // return false
-    // }
-    $('#sicalc').get(0).clearData({since:0}, { cookies: false })
     $('#sicalc').attr('src', 'http://www31.receita.fazenda.gov.br/sicalcweb/princ.asp?AP=P&TipTributo=1&FormaPagto=1&UF=MG11&municipiodesc=BELO+HORIZONTE&js=s&ValidadeDaPagina=1&municipio=4123')
   })
   $('#sicalc').get(0).addEventListener("loadstop", function(e) {
@@ -97,8 +92,8 @@ $(window).load(function () {
   $('#taxable_brl').change(updateMonthlyTax)
   $('#taxable_month').change(updateMonthlyTax)
 
-  //;csv = $('#benefit_access_csv').contents().text()
-  //loadBenefitAccessXls(xls)
+  csv = $('#benefit_access_xls2csv').contents().text()
+  loadPerMonthData(parseBenefitAccessCsv(csv))
   $('#txh_csv').change(listenDarfTableFileUpload)
   $('#darf_month_ui').on("change", changeDarfTableMonth)
   $('#sicalc').get(0).setUserAgentOverride('Mozilla/5.0 (Linux; Android 4.0.4; Galaxy Nexus Build/IMM76B) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.133 Mobile Safari/535.19')

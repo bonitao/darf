@@ -1,0 +1,21 @@
+,,,,,,,,,
+,,,,,,,,,
+,,,Name:,,JOHN            DOES                ,,,,
+,,,CompanyName:,,"Giigle, oInc.         ",,,,
+,,,PlanName:,,AllPlans,,,,
+,,,Title:,,completedAll,,,,
+,,,Type:,,All,,,,
+,,,Date Range:,,All,,,,
+Date,Order Number,Plan,Type,Order Status,Price,Quantity,Net Cash Proceeds,Net Share Proceeds,Tax Payment Method
+12/25/2014,N/A,GSU Class A,Released Shares,Completed,$0,6,$0,0,N/A
+12/25/2014,N/A,GSU Class A,Release,Completed,536.93,6,$0,6,Withhold to Cover
+10/25/2014,N/A,GSU Class C,Release,Completed,539.78,6,$0,6,Withhold to Cover
+10/25/2014,N/A,GSU Class C,Released Shares,Completed,$0,6,$0,0,N/A
+03/25/2014,N/A,Historical GSU,Release,Completed,1157.93,7,$0,7,Withhold to Cover
+,,,,,,,,,
+Tue Jan 06 13:26:57 EST 2015,,,,,,,,,
+,,,,,,,,,
+This is not an official statement and is available only for your convenience.  Information on this website is general in nature. It is not intended to cover the specific terms of your company`s equity plan(s). Please refer to your company`s equity plan documents if you have any questions.,,,,,,,,,
+,,,,,,,,,
+Morgan Stanley Smith Barney LLC. Member SIPC.,,,,,,,,,
+

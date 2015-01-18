@@ -14,7 +14,7 @@
    <script>
      asyncTest("updateGoog", function() {
        var dateobj = new Date("Dec 25, 2013")
-       var google_finance_url = 'http://www.google.com/finance/historical?q=NASDAQ%3AGOOG&startdate=Dec+15,+2013&enddate=Dec+25,+2013&num=30&output=csv';
+       var google_finance_url = 'http://www.google.com/finance/historical?q=NASDAQ%3AGOOG&startdate=Dec+14,+2013&enddate=Dec+24,+2013&num=30&output=csv';
        csv = $('#google_finance_historical_csv').contents().text()
        $.mockjax({url: google_finance_url, responseText: csv });
        element = '#qunit-fixture'

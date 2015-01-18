@@ -13,9 +13,12 @@ cli.main(function(args, options) {
   var sheet = workbook.Sheets[workbook.SheetNames[0]]
   var csv_content = XLS.utils.sheet_to_csv(sheet)
   var phantom_cli = require('./phantom_cli_helper');
-  phantom_cli.phantomCli('../app/darf_test.html', this.debug,
+  phantom_cli.phantomCli('./app/darf_test.html', this.debug,
     function(csv_content, year) {
-      per_month_data = parseBenefitAccessCsv(csv_content)
+      console.log("Parsing csv year", year)
+      console.log("Parsing csv year", parseBenefitAccessCsv)
+      var per_month_data = parseBenefitAccessCsv(csv_content)
+      console.log("Genearting report")
       return generateMonthlyReportOnce(per_month_data, year)
     }, [csv_content, options.year],
     function(monthly_report) {

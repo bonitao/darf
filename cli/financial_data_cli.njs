@@ -20,7 +20,7 @@ cli.main(function(args, options) {
       })
     }, [options.date, options.symbol, options.currency],
     function(results) {
-      console.log('Reference date:', options.date)
+      console.log('Reference date:', options.date, '(note share value is closing value from previous day)')
       console.log('Price for one ' + options.symbol + ' share in USD: ' + results[0])
       console.log('Price for one USD in ' + options.currency + ': ' + results[1])
       console.log('Price for one ' + options.symbol + ' share in ' +

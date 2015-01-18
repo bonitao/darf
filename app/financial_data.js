@@ -15,6 +15,9 @@ var getShareFormatDate = function(mydate) {
 
 var getShareValue = function(date, symbol) {
   date = readDate(date)
+  // In the Morgan Stanley report, the share value is the closing price of the
+  // preceding day of the vesting date, which is what we use here.
+  date.setDate(date.getDate()-1)
   symbol = symbol.toUpperCase()
   console.log('Running get share for symbol', symbol, 'at date', date)
   // The CSV end-point is cors unfriendly, but we are packaged app mano.
@@ -59,7 +62,7 @@ var updateGoog = function(date, target) {
  * returns {Deferred} Promise holding the rounded %.2f BRL value of 1 USD.
  */
 var getExchangeRate = function(date, currency) {
-  console.log('Getting rate for', currency, 'at', date)
+  // console.log('Getting rate for', currency, 'at', date)
   date = readDate(date)
   currency = currency.toUpperCase()
   openexchangerates_tmpl = 'http://openexchangerates.org/api/historical/{date}.json?app_id=e9566249a33641ebb9c010a5dbd18a2f'

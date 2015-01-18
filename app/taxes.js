@@ -162,7 +162,7 @@ var calculateMonthlyTaxOnceFromUSD = function(taxable_usd, tax_date) {
     return calculateMonthlyTaxOnceFromBRL(taxable_brl, tax_date)
   })
 }
-    
+
 var calculateMonthlyTaxOnceFromShare = function(share_count, symbol, vestingdate) {
   vestingdate = readDate(vestingdate)
   // console.log('Share count:', share_count)
