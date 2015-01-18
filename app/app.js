@@ -33,10 +33,10 @@ $(function() {
   $('#darf_button').button()
   $("#darf_button").prop("disabled", false);
   $('#darf_button').click(function() {
-    if ($('#cpf').val().length == 0 || $('#cpf_dv').val().length == 0) {
-      $("<p>Please fill your CPF on the top right of the application.</p>").dialog({modal:true, buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); } } ] });
-      return false
-    }
+    // if ($('#cpf').val().length == 0 || $('#cpf_dv').val().length == 0) {
+      // $("<p>Please fill your CPF on the top right of the application.</p>").dialog({modal:true, buttons: [ { text: "Ok", click: function() { $( this ).dialog( "close" ); } } ] });
+      // return false
+    // }
     $('#sicalc').get(0).clearData({since:0}, { cookies: false })
     $('#sicalc').attr('src', 'http://www31.receita.fazenda.gov.br/sicalcweb/princ.asp?AP=P&TipTributo=1&FormaPagto=1&UF=MG11&municipiodesc=BELO+HORIZONTE&js=s&ValidadeDaPagina=1&municipio=4123')
   })
