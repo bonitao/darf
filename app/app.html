@@ -50,15 +50,13 @@
     </table>
     </td></tr></table>
 
-    <div id="bancocentral2"><webview style="width:600px; height:250px" src="http://www4.bcb.gov.br/pec/taxas/port/ptaxnpesq.asp?id=txcotacao"></webview></div>
-
     <div id="quotes_accordion">
       <h3>Banco Central</h3>
-      <div id="bancocentral"><webview style="width:600px; height:250px" src="http://www4.bcb.gov.br/pec/taxas/port/ptaxnpesq.asp?id=txcotacao"></webview></div>
+      <div id="bancocentral"><webview style="width:600px; height:250px; display:none" src="http://www4.bcb.gov.br/pec/taxas/port/ptaxnpesq.asp?id=txcotacao"></webview></div>
       <h3>Yahoo Finance</h3>
-      <div id="yahoofinance"><webview style="width:600px; height:250px" src="http://finance.yahoo.com/q?s=GOOGL"></webview></div>
+      <div id="yahoofinance"><webview style="width:600px; height:250px; display:none" src="http://finance.yahoo.com/q?s=GOOGL"></webview></div>
       <h3>Receita da Fazenda</h3>
-      <div id="receita"><webview style="width:600px; height:250px" src="http://receita.fazenda.gov.br/aliquotas/ContribFont2012a2015.htm"></webview></div>
+      <div id="receita"><webview style="width:600px; height:250px; display:none" src="http://receita.fazenda.gov.br/aliquotas/ContribFont2012a2015.htm"></webview></div>
     </div>
   </div>
   <div id="tabs-2">
@@ -132,7 +130,7 @@
       <td align=right>Imposto: <span title="Imposto devido" class="ui-highlight-class" style="font-size:large;border:2px;padding:2px" id="darf_value">R$ 1000</span></td>
       <td align=right><button id="darf_button">Imprimir Darf</button></td>
     </tr></table>
-    <div><webview id="sicalc" style="width:620px; height:250px"></webview></div>
+    <div><webview id="sicalc" style="width:620px; height:250px; display:none"></webview></div>
     <iframe src='testdata/benefit_access_csv.txt' style="display: none;" id="benefit_access_csv"></iframe>
   </div>
 </div>

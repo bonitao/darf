@@ -64,6 +64,12 @@ $(function() {
       w.print();
     })
   }
+  // There is some bug in the interaction between jqueryui and webview, which
+  // breaks webviews which are not visible at application start. Probably some
+  // reminiscent of https://code.google.com/p/chromium/issues/detail?id=387484.
+  // We set display:none in all the webview and then call show here, which
+  // works around the problem.
+  $('webview').show()
 })
 
 $(window).ready(function () {})
@@ -97,5 +103,4 @@ $(window).load(function () {
   $('#darf_month_ui').on("change", changeDarfTableMonth)
   $('#sicalc').get(0).setUserAgentOverride('Mozilla/5.0 (Linux; Android 4.0.4; Galaxy Nexus Build/IMM76B) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.133 Mobile Safari/535.19')
   $('#sicalc').attr('src', 'http://m.slashdot.org')
-
 })
