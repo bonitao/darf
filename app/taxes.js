@@ -114,6 +114,7 @@ var updateTaxTable = function(year) {
 var updateTaxTables = function() {
   updateTaxTable(2013);
   updateTaxTable(2014);
+  updateTaxTable(2015);
 }
 
 var calculateMonthlyTax = function(taxable_brl, tax_date, tax_tables) {

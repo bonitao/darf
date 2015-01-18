@@ -63,10 +63,8 @@ var generateMonthlyReportOnce = function(per_month_data, year) {
       }
     ))
   })
-  console.log('All rpcs constructed')
   return $.when.apply($, rpcs).then(function() {
     exchange_rate_array = $.makeArray(arguments)
-    console.log('Got rpc responses', JSON.stringify(exchange_rate_array))
     per_month_exchange_rate = {}
     // Unpack the rpc responses and create a data structure with the the same
     // number of keys as per_month_data, but having the exchange rate date as
@@ -117,7 +115,7 @@ var parseBenefitAccessXlsFromFile = function(xls_file) {
   var reader = new FileReader()
   var ret = $.Deferred()
   reader.onload = function(e) {
-    xls_content = e.target.result
+    binary_xls_content = e.target.result
     var workbook = XLS.read(binary_xls_content, { type: 'binary' })
     var sheet = workbook.Sheets[workbook.SheetNames[0]]
     var csv_content = XLS.utils.sheet_to_csv(sheet)
@@ -136,8 +134,8 @@ var updateDarfTable = function(month, per_month_data) {
   $('#txh_table').dataTable().fnClearTable()
   for (var i = 0; i < per_month_data[month].length; i++) {
     row = per_month_data[month][i]
-     price = parseFloat(row['Price'])
-     share_count = parseFloat(row['Quantity'])
+     price = parseFloat(row['Price']).toFixed(2)
+     share_count = parseInt(row['Quantity'])
      net_cash_proceeds = price * share_count
      $('#txh_table').dataTable().fnAddData([
        row['Date'],
@@ -175,7 +173,7 @@ var updateIncomeAndTax = function(month, per_month_data) {
   }
   var month_date = $.datepicker.parseDate($.datepicker.ATOM, month)
   darf_exchange_rate_promise = getExchangeRate(
-      getExchangeRateTaxDate(month_date))
+      getExchangeRateTaxDate(month_date), 'BRL')
   darf_taxable_brl_promise = $.when(darf_exchange_rate_promise).then(
           function(exchange_rate) {
     $('#darf_usd_income').text(income_value_usd.toFixed(2))
@@ -211,8 +209,7 @@ var changeDarfTableMonth = function(e) {
   return false
 }
 
-var loadBenefitAccessXls = function(xls_file) {
-  per_month_data = parseBenefitAccessXlsFromFile(csv)
+var loadPerMonthData = function(per_month_data) {
   $('#txh_table').data('per_month_data', per_month_data)
   var months = Object.keys(per_month_data).sort()
   populateMonthSelect(months)
@@ -227,5 +224,7 @@ var loadBenefitAccessXls = function(xls_file) {
 
 var listenDarfTableFileUpload = function(e) {
   if (e.target.files == undefined) return
-  loadBenefitAccessXls(e.target.result)
+  parseBenefitAccessXlsFromFile(e.target.files[0]).then(function(per_month_data) {
+    loadPerMonthData(per_month_data)
+  })
 }

@@ -4,6 +4,7 @@
 <head>
 <meta charset="utf-8">
 <title>Pagamento de imposto</title>
+<script src="libs/xls.full.min.js"></script>
 <script src="libs/jquery.min.js"></script>
 <link rel="stylesheet" href="libs/jquery-ui.css">
 <link rel="stylesheet" href="libs/select2.css">
@@ -12,6 +13,7 @@
 <script src="libs/jquery.csv.js"></script>
 <script src="libs/jquery.dataTables.js"></script>
 <script src="libs/select2.js"></script>
+<script src="libs/accounting.js"></script>
 <script src="libs/accounting.js"></script>
 <script src="utils.js"></script>
 <script src="financial_data.js"></script>
@@ -29,19 +31,26 @@
     <li><a href="#tabs-4">DARFs</a></li>
   </ul>
   <div id="tabs-1"> <p>No último dia útil, <span id="last_weekday"></span>, o dólar estava cotado em R$ <span id="last_weekday_usdbrl"></span>,
-    e a ação do Google estava cotada em US$ <span id="last_weekday_goog"></span>. Veja
+    e a ação GOOG estava cotada em US$ <span id="last_weekday_goog"></span>. Veja
     abaixo as tabelas de imposto e fontes para conferência.</p>
     <table width="90%"><tr><td>
-    <table id="table2013" width='40%'>
+    <table id="table2013" width='30%'>
       <caption>Tabela de imposto 2013</caption>
       <thead><tr><th>Base</th><th>Alíquota</th><th>Dedução</th></tr></thead>
     </table>
     </td><td>
-    <table id="table2014">
+    <table id="table2014" width='30%'>
       <caption>Tabela de imposto 2014</caption>
       <thead><tr><th>Base</th><th>Alíquota</th><th>Dedução</th></tr></thead>
     </table>
+    </td><td>
+    <table id="table2015" width='30%'>
+      <caption>Tabela de imposto 2015</caption>
+      <thead><tr><th>Base</th><th>Alíquota</th><th>Dedução</th></tr></thead>
+    </table>
     </td></tr></table>
+
+    <div id="bancocentral2"><webview style="width:600px; height:250px" src="http://www4.bcb.gov.br/pec/taxas/port/ptaxnpesq.asp?id=txcotacao"></webview></div>
 
     <div id="quotes_accordion">
       <h3>Banco Central</h3>
@@ -77,7 +86,7 @@
   </div>
   <div id="tabs-3">
     <p>
-      <span title="Principal">Receita tributável</span> em R$: <input type="number" id="taxable_blr"/><br/>
+      <span title="Principal">Receita tributável</span> em R$: <input type="number" id="taxable_brl"/><br/>
       <span title="Mês em que as ações foram vested">Mês de referência</span>: <input type="text" id="taxable_month"/><br/>
     </p>
     <p>
@@ -108,10 +117,10 @@
     <p id='darf_income_calculation' style="display: none;">Receita aferida:
         US$ <span id="darf_usd_income" title="Receita tributável total aferida no mês em US$.">1</span> ×
         R$/US$ <span id="darf_exchange_rate" title="Cotação do último dia útil da primeira quinzena do mês anterior.">2.0</span> =
-        R$ <span id="darf_blr_taxable" title="Receita tributável em reais">?</span>
+        R$ <span id="darf_brl_taxable" title="Receita tributável em reais">?</span>
     </p>
     <p id='darf_tax_calculation' style="display: none;">Imposto devido:
-         R$ <span id="darf_taxable_blr" title="Receita tributável total aferida no mês">1</span> ×
+         R$ <span id="darf_taxable_brl" title="Receita tributável total aferida no mês">1</span> ×
             <span id="darf_tax_rate" title="Alíquota">1</span>% -
          R$ <span id="darf_tax_deduction" title="Dedução">1</span> =
          R$ <span id="darf_tax_value" title="Imposto devido">1</span>.

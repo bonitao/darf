@@ -2,7 +2,10 @@
 $(function() {
   $(document).tooltip();  // enable tooltips as title attribute
   $('#tabs').tabs()
-  $("#quotes_accordion" ).accordion({active: false, collapsible: true});
+  $("#quotes_accordion").accordion({active: false, collapsible: true, activate: function(event, ui) { 
+      $("#quotes_accordion").accordion("refresh")
+      console.log('accordion refreshed')
+  }});
 
   $.datepicker.setDefaults($.datepicker.regional['pt-BR'])
   $('#vestingdate').datepicker();
@@ -83,13 +86,13 @@ $(window).load(function () {
   month_day.setDate(1)
   month_day.setMonth(month_day.getMonth()-1)
   $('#taxable_month').datepicker('setDate', month_day)
-  $('#taxable_blr').val(3000)
+  $('#taxable_brl').val(3000)
   updateMonthlyTax()
-  $('#taxable_blr').change(updateMonthlyTax)
+  $('#taxable_brl').change(updateMonthlyTax)
   $('#taxable_month').change(updateMonthlyTax)
 
-  csv = $('#benefit_access_csv').contents().text()
-  loadBenefitAccessCsv(csv)
+  //;csv = $('#benefit_access_csv').contents().text()
+  //loadBenefitAccessXls(xls)
   $('#txh_csv').change(listenDarfTableFileUpload)
   $('#darf_month_ui').on("change", changeDarfTableMonth)
   $('#sicalc').get(0).setUserAgentOverride('Mozilla/5.0 (Linux; Android 4.0.4; Galaxy Nexus Build/IMM76B) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.133 Mobile Safari/535.19')
