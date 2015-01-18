@@ -15,14 +15,38 @@
    <script src="libs/jquery.dataTables.js"></script>
    <script src="libs/jquery.mockjax.js"></script>
    <script src="libs/select2.js"></script>
+   <script src="utils.js"></script>
+   <script src="financial_data.js"></script>
+   <script src="taxes.js"></script>
    <script src="darf.js"></script>
    <script>
      test("parseBenefitAccessXml2CsvTest", function() {
        csv = $('#benefit_access_xls2csv').contents().text()
-       data = parseBenefitAccessCsv(csv)
-       deepEqual(data['2014-03-01'][0]['Date'], '03/25/2014')
-       deepEqual(parseInt(data['2014-03-01'][0]['Quantity']), 7)
+       per_month_data = parseBenefitAccessCsv(csv)
+       deepEqual(per_month_data['2014-03-01'][0]['Date'], '03/25/2014')
+       deepEqual(parseInt(per_month_data['2014-03-01'][0]['Quantity']), 7)
      });
+
+     test("generateMonthlyReportTest", function() {
+       csv = $('#benefit_access_xls2csv').contents().text()
+       per_month_data = parseBenefitAccessCsv(csv)
+       per_month_exchange_rate = {}
+       $.each(per_month_data, function(month, entries) {
+         // Use the month digits as the cents for the exchange rate
+         value = 1 + parseInt(month.slice(5,-2))/100.0
+         key = $.datepicker.formatDate($.datepicker.ATOM, window.getExchangeRateTaxDate(month))
+         per_month_exchange_rate[key] = value
+       })
+       tax_tables = JSON.parse($('#tax_tables_json').contents().text())
+       report = generateMonthlyReport(per_month_data, per_month_exchange_rate, tax_tables)
+       expected = [
+          "2014-12: R$208.88 tax from income US$3221.58 x 1.12@2014-11-14",
+	  "2014-10: R$199.35 tax from income US$3238.68 x 1.1@2014-09-15",
+	  "2014-03: R$1469.74 tax from income US$8105.51 x 1.03@2014-02-14" ].join('\n')
+       deepEqual(report, expected)
+     });
+
+/*
      asyncTest("updateDarfTable", function() {
        $('#qunit-fixture').append('<table id="txh_table"> <thead><tr><th>Data</th><th>Transação</th><th>Preço (US$)</th><th>Ações</th><th>Valor (US$)</th></tr></thead><tbody><tr><td>0</td><td>1</td><td>2</td><td>3</td>4<td></td></tr></tbody></table>')
        $('#txh_table').dataTable()
@@ -65,6 +89,7 @@
          })
        })
      });
+*/
    </script>
 </head>
 <body>
@@ -72,5 +97,6 @@
   <div id="qunit-fixture"></div>
   <iframe src='testdata/benefit_access_csv.txt' width='0' height='0' style="visibility: hidden" id="benefit_access_csv"></iframe>
   <iframe src='testdata/benefit_access_xls2csv.txt' width='0' height='0' style="visibility: hidden" id="benefit_access_xls2csv"></iframe>
+  <iframe src='taxtable.json.txt' width='0' height='0' style="visibility: hidden" id="tax_tables_json"></iframe>
 </body>
 </html>

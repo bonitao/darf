@@ -117,6 +117,7 @@ var updateTaxTables = function() {
 }
 
 var calculateMonthlyTax = function(taxable_brl, tax_date, tax_tables) {
+  tax_date = readDate(tax_date)
   var year = tax_date.getFullYear()
   var range = 0, rate = 0, deduction = 0
   for (row_id in tax_tables[year]) {

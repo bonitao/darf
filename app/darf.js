@@ -3,7 +3,8 @@
  * string formatted with datepicker.ATOM and day component fixed to 1.
  *
  * The csv content must be derived with xlsjs from the xls file exported from
- * Morgan Stanley Smith Barney. See tests for an example input.
+ * Morgan Stanley Smith Barney. See tests for an example input. All data
+ * previous to 2014 is discarded.
  */
 var parseBenefitAccessCsv = function(csv_content) {
   // Remove leading and trailing lines with different schema, but keep headers.
@@ -30,13 +31,64 @@ var parseBenefitAccessCsv = function(csv_content) {
   return per_month_data
 }
 
-var generateMonthlyReportOnce = function(per_month_data) {
+/* Creates a copy of per_month_data including only keys referring to the given
+ * year.
+ */
+var filterPerMonthData = function(per_month_data, year) {
+  var filtered = {}
+  $.each(per_month_data, function(monthstr, entries) {
+     month_date = readDate(monthstr)
+     if (month_date.getFullYear() == year) {
+       filtered[monthstr] = entries
+     }
+  })
+  return filtered
+}
+
+
+// Retrieves tax date exchange rate value for each month in per_month_data and
+// calls generateMonthlyReport.
+var generateMonthlyReportOnce = function(per_month_data, year) {
+  per_month_data = filterPerMonthData(per_month_data, year)
+  rpcs = []
+  // For each month of interest, shoot an rpc that will return the tax date for
+  // the exchange rate and the exchange rate at that date.
+  $.each(per_month_data, function(monthstr, entries) {
+    exchange_rate_tax_date = getExchangeRateTaxDate(readDate(monthstr))
+    rpcs.push(getExchangeRate(exchange_rate_tax_date, 'BRL').then(
+      function(exchange_rate) {
+        // This needs to be computed again because the outer variable does not get captured properly
+        exchange_rate_tax_date = getExchangeRateTaxDate(readDate(monthstr))
+        return [new Date(exchange_rate_tax_date), exchange_rate]
+      }
+    ))
+  })
+  console.log('All rpcs constructed')
+  return $.when.apply($, rpcs).then(function() {
+    exchange_rate_array = $.makeArray(arguments)
+    console.log('Got rpc responses', JSON.stringify(exchange_rate_array))
+    per_month_exchange_rate = {}
+    // Unpack the rpc responses and create a data structure with the the same
+    // number of keys as per_month_data, but having the exchange rate date as
+    // keys and the exchange rates as the value of the dict.
+    for (var i = 0; i < exchange_rate_array.length; i++) {
+      key = $.datepicker.formatDate($.datepicker.ATOM, exchange_rate_array[i][0])
+      per_month_exchange_rate[key] = exchange_rate_array[i][1]
+    }
+    return downloadTaxTable().then(function(tax_tables) {
+      return generateMonthlyReport(per_month_data, per_month_exchange_rate, tax_tables)
+    })
+  })
+}
+
+var generateMonthlyReport = function(per_month_data, per_month_exchange_rate, tax_tables) {
   report_lines = []
-  $.each(per_month_data, function(i, month) {
+  $.each(per_month_data, function(month, entries) {
     goog_share_count = 0
     googl_share_count = 0
     income_value_usd = 0
-    $.each(month, function(j, e) {
+    for (var i = 0; i < entries.length; i++) {
+      e = entries[i]
       quantity = parseInt(e['Quantity']) 
       price = parseFloat(e['Price'])
       if (e['Type'] == 'GSU Class A') {
@@ -44,12 +96,21 @@ var generateMonthlyReportOnce = function(per_month_data) {
       } else if (e['Type'] == 'GSU Class C' || e['Type'] == 'Historical GSU') {
         goog_share_count = goog_share_count + quantity 
       }
-      income_value_usd = price * quantity
-    })
-    line = 'Income for ' + month + ': ' + income_value_usd
-    report_lines.append(line)
+      income_value_usd = income_value_usd + price * quantity
+    }
+    e
+    exchange_rate_key =
+        $.datepicker.formatDate($.datepicker.ATOM, getExchangeRateTaxDate(month))
+    exchange_rate = per_month_exchange_rate[exchange_rate_key]
+    income_value_brl = income_value_usd * exchange_rate
+    tax_calculation = calculateMonthlyTax(income_value_brl, month, tax_tables)
+    line = month.slice(0, -3) + ': '
+    line += 'R$' + tax_calculation.tax_brl.toFixed(2) + ' tax from income '
+    line += 'US$' + income_value_usd.toFixed(2) + ' x ' + exchange_rate
+    line += '@' + $.datepicker.formatDate('yy-mm-dd', getExchangeRateTaxDate(month))
+    report_lines.push(line)
   })
-  return '\n'.join(report_lines)
+  return report_lines.join('\n')
 }
 
 var parseBenefitAccessXlsFromFile = function(xls_file) {
