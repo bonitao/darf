@@ -8,7 +8,16 @@
  */
 var parseBenefitAccessCsv = function(csv_content) {
   // Remove leading and trailing lines with different schema, but keep headers.
-  csv = csv_content.split('\n').slice(8, -8).join('\n')
+  csv = csv_content.split('\n')
+  start = 0
+  for (; start < csv.length; ++start) {
+    if (csv[start].indexOf('Date,') === 0) break
+  }
+  if (start == csv.length) {
+    console.log("Error: failed to find header of csv file")
+  }
+  csv = csv.slice(start, -8).join('\n')
+
   type_key = 'Type'
   date_key = 'Date'
   date_pattern = 'mm/dd/yy'
